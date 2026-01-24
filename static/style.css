@@ -174,3 +174,15 @@ ul li {
     margin-bottom: 8px;
     color: #000;
 }
+
+.beta-warning {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #6c5ce7;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    z-index: 999;
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Mingleoo.com - BETA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="/static/images/1.png">
+
+
+</head>
+<body>
+<nav>
+    <div class="nav-left">
+        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
+        <a href="{{ url_for('dashboard') }}" class="site-link">Mingleoo.com</a>
+    </div>
+    <div class="nav-right">
+        <a href="{{ url_for('notifications') }}">Notificações</a>
+        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+    </div>
+</nav>
+
+
+<h1>Editar Perfil</h1>
+
+<form action="/profile" method="POST">
+
+    <div class="card">
+        <h2>Sobre Mim</h2>
+        <textarea name="bio" rows="4" placeholder="Escreva algo sobre você...">{{ user[1] }}</textarea>
+    </div>
+
+<div class="card">
+    <h2>Seções Personalizadas</h2>
+    <div id="sections-container">
+        {% for section in user_sections %}
+        <div class="section">
+            <input type="text" name="section_title" placeholder="Título da seção" value="{{ section[0] }}">
+            <textarea name="section_content" rows="3" placeholder="Conteúdo da seção">{{ section[1] }}</textarea>
+            <button type="button" onclick="this.parentNode.remove()">Remover</button>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" class="add-btn" onclick="addSection()">Adicionar Seção</button>
+</div>
+
+
+    <div class="card">
+        <h2>Coloque seus gostos!</h2>
+        <div id="tags-container">
+            {% for tag in user_tags %}
+            <div class="tag">
+                <input type="text" name="tags" value="{{ tag }}">
+                <button type="button" onclick="this.parentNode.remove()">Remover</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="add-btn" onclick="addTag()">Adicionar hashtag</button>
+    </div>
+
+    
+
+    <div class="card">
+        <h2>Links de Contato</h2>
+        <p>Para adicionar um link coloque NomePlataforma|URL</p>
+        <div id="links-container">
+            {% for link in user_links %}
+            <div class="link">
+                <input type="text" name="links" value="{{ link[0] }}|{{ link[1] }}">
+                <button type="button" onclick="this.parentNode.remove()">Remover</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="add-btn" onclick="addLink()">Adicionar link</button>
+    </div>
+
+    <div class="card" style="text-align:center;">
+        <button type="submit">💾 Salvar Perfil</button>
+    </div>
+
+    
+
+</form>
+
+<script>
+function addTag() {
+    const container = document.getElementById("tags-container");
+    const div = document.createElement("div");
+    div.className = "tag";
+    div.innerHTML = `<input type="text" name="tags" placeholder="#exemplo">
+                     <button type="button" onclick="this.parentNode.remove()">Remover</button>`;
+    container.appendChild(div);
+}
+
+function addLink() {
+    const container = document.getElementById("links-container");
+    const div = document.createElement("div");
+    div.className = "link";
+    div.innerHTML = `<input type="text" name="links" placeholder="Discord|https://discord.com/...">
+                     <button type="button" onclick="this.parentNode.remove()">Remover</button>`;
+    container.appendChild(div);
+}
+
+function addSection() {
+    const container = document.getElementById("sections-container");
+    const div = document.createElement("div");
+    div.className = "section";
+    div.innerHTML = `
+        <input type="text" name="section_title" placeholder="Título da seção">
+        <textarea name="section_content" rows="3" placeholder="Conteúdo da seção"></textarea>
+        <button type="button" onclick="this.parentNode.remove()">Remover</button>
+    `;
+    container.appendChild(div);
+}
+
+</script>
+
+</body>
+</html>

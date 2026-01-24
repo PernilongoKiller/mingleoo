@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Mingleoo.com - BETA</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" type="image/png" href="/static/images/1.png">
+
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
+        <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+    </div>
+    <div class="nav-right">
+        <a href="{{ url_for('notifications') }}">Notificações ({{ notification_count }})</a>
+        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+    </div>
+</nav>
+
+    <h1>Perfis com #{{ tag }}</h1>
+
+    {% if users %}
+        {% for user in users %}
+            <h3>{{ user[1] }}</h3>
+            <p>{{ user[2] }}</p>
+            <a href="{{ url_for('view_profile', user_id=user[0]) }}">Ver perfil</a>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>Nenhum perfil encontrado para #{{ tag }}</p>
+    {% endif %}
+
+    <p><a href="/dashboard">Voltar ao dashboard</a></p>
+
+</body>
+</html>

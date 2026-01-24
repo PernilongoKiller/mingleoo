@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Mingleoo.com - BETA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="/static/images/1.png">
+
+    <style>
+        body {
+            font-family: 'Comic Neue', sans-serif;
+            background-color: #fff;
+            color: #000;
+            margin: 0;
+            padding-top: 60px; /* para nav fixa */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav {
+            width: 100%;
+            background-color: #b82828;
+            padding: 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #911f1f;
+        }
+
+        .nav-left img.logo {
+            height: 35px;
+        }
+
+        h1 {
+            color: #e24040;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #e24040;
+            margin-top: 40px;
+        }
+
+        p {
+            margin: 5px 0 15px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background-color: #e24040;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #b82828;
+        }
+
+        a {
+            color: #e24040;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Card de perfil */
+        .profile-card {
+            border: 1px solid #e24040;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .profile-card h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .profile-card p {
+            margin: 0 0 10px 0;
+        }
+
+        .profile-card a.btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
+        <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+    </div>
+    <div class="nav-right">
+        <a href="{{ url_for('notifications') }}">Notificações ({{ notification_count }})</a>
+        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+    </div>
+</nav>
+
+<h1>Olá, {{ username }}! ;D</h1>
+<p>Explore perfis e encontre pessoas como você.</p>
+
+<form action="/search" method="GET">
+    <input type="text" name="tag" placeholder="#exemplo" required>
+    <button type="submit" class="btn">Pesquisar</button>
+</form>
+
+<form action="{{ url_for('surprise') }}" method="GET" style="margin-top:20px;">
+    <button type="submit" class="btn">Surpreenda-me!</button>
+</form>
+
+<hr>
+
+<h2>Perfis que combinam com você:</h2>
+
+{% if compatible_users %}
+    {% for u in compatible_users %}
+    <div class="profile-card">
+        <h3>{{ u[1] }}</h3>
+        <p>{{ u[2] }}</p>
+        <p>{{ u[3] }} hashtags em comum</p>
+        <a href="{{ url_for('view_profile', user_id=u[0]) }}" class="btn">Ver perfil</a>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Nenhum perfil encontrado com hashtags em comum 😎</p>
+{% endif %}
+
+</body>
+</html>

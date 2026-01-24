@@ -256,26 +256,6 @@ def login():
 
     return render_template("login.html")
 
-@app.route("/delete_account", methods=["POST"])
-def delete_account():
-    user_id = current_user_id()
-    if not user_id:
-        return redirect(url_for("login"))
-
-    conn = db()
-    cur = conn.cursor()
-    
-    cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
-    
-    cur.execute("DELETE FROM accounts WHERE id = ?", (session["account_id"],))
-
-    conn.commit()
-    conn.close()
-
-    session.clear()
-
-    return redirect(url_for("index"))
-
 
 @app.route("/dashboard")
 def dashboard():
@@ -441,8 +421,6 @@ def edit_profile():
         user_sections=user_sections
     )
 
-
-
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True)
+    app.run()

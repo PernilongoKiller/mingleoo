@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Mingleoo.com - BETA</title>
+    <meta name="description" content="Mingleoo.com é a sua rede social para fazer amigos, conhecer pessoas novas e se conectar com perfis que combinam com você. Encontre sua comunidade hoje!">
+    <title>Mingleoo.com | Faça Amigos e Conecte-se com Pessoas Novas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="/static/images/1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,10 +57,12 @@
 
     <!-- Conteúdo principal -->
     <div class="container">
-        <h1>Mingleoo.com - Um lugar para encontrar pessoas como você!</h1>
+        <h1>Mingleoo.com: Faça Amigos e Conecte-se Facilmente!</h1>
+
+        <p>Encontre sua comunidade, faça amigos novos e explore perfis de pessoas que compartilham seus interesses. Conecte-se com facilidade e comece a construir suas novas amizades hoje!</p>
 
         <p>
-            <a href="/register" class="btn">Conecte-se</a>
+            <a href="/register" class="btn">Junte-se à Mingleoo!</a>
         </p>
 
         <h2>Perfis</h2>
@@ -83,6 +86,11 @@
         </div>
         {% endfor %}
     </div>
+
+    <footer>
+        <p>&copy; 2026 mingleoo.com. Todos os direitos reservados.</p>
+        <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
+    </footer>
 
 </body>
 </html>

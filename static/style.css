@@ -95,10 +95,10 @@ nav {
 .container {
     width: 90%;
     max-width: 860px; /* Aumento do max-width */
-    margin: 30px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    margin: 30px auto; /* Centraliza o container */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Colunas responsivas */
+    gap: 25px; /* Espaço entre os cards */
     padding: 0 15px; /* Padding para as laterais em telas maiores */
 }
 
@@ -135,10 +135,10 @@ nav {
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     padding: 25px;
-    margin-bottom: 25px;
     background-color: #fff;
-    width: 100%;
-    max-width: 600px;
+    height: 100%; /* Make card fill grid area */
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -377,40 +377,52 @@ ul li::before {
 --------------------------- */
 @media (max-width: 768px) {
     body {
-        padding-top: 80px;
-        font-size: 16px;
+        padding-top: 60px; /* Adjust padding for smaller nav */
+        font-size: 15px;
     }
 
     nav {
-        padding: 10px 15px; 
+        padding: 8px 15px;
     }
 
     .nav-left .site-link {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .nav-right a {
-        margin-left: 10px;
-        font-size: 0.95em;
+        font-size: 0.9em;
+    }
+    
+    .nav-right {
+        gap: 10px; /* Reduce gap for smaller screens */
     }
 
     .container, .profile-container {
-        width: 95%;
-        margin: 20px 0;
-        padding: 20px;
+        width: 100%; /* Full width on smaller screens */
+        margin: 15px 0;
+        padding: 15px; /* Reduced padding */
+        border-radius: 0; /* No rounded corners for full-screen feel */
+        box-shadow: none; /* No shadow for app-like feel */
+    }
+    
+    .profile-banner {
+        width: 100%;
+        margin: -15px -15px 15px -15px; /* Adjust negative margin for new padding */
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 
     h1 {
-        font-size: 2em;
-        margin-bottom: 15px;
-    }
-    h2 {
-        font-size: 1.6em;
+        font-size: 1.8em;
         margin-bottom: 12px;
     }
-    h3 {
-        font-size: 1.3em;
+    h2 {
+        font-size: 1.4em;
         margin-bottom: 10px;
+    }
+    h3 {
+        font-size: 1.2em;
+        margin-bottom: 8px;
     }
 
     input[type="text"],
@@ -419,12 +431,12 @@ ul li::before {
     button,
     .btn, .btn-99, .btn-mingle {
         padding: 10px 15px;
-        font-size: 0.95em;
+        font-size: 0.9em;
     }
 
     form button.btn {
          width: auto;
-         padding: 10px 18px;
+         padding: 8px 15px;
     }
     
     form[action="/search"] {
@@ -434,42 +446,55 @@ ul li::before {
 
      form[action="/search"] input {
         flex-grow: 1;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
      }
 
     .profile-card, .card {
-        padding: 18px;
-        margin-bottom: 20px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .beta-warning {
-        font-size: 13px;
-        padding: 8px;
+        font-size: 12px;
+        padding: 6px;
     }
 }
 
 @media (max-width: 480px) {
     .nav-left .site-link {
-        display: none; /* Esconde o texto "Mingleoo.com" em telas muito pequenas */
+        /* Keep site-link visible, adjust size */
+        display: block; 
+        font-size: 18px;
     }
-    .nav-left .logo { /* Add this for diagnosis */
-        display: block !important;
-        width: 38px !important;
-        height: 38px !important;
-    }
-
-    h1 {
-        font-size: 1.8em;
-    }
-    h2 {
-        font-size: 1.4em;
-    }
-    h3 {
-        font-size: 1.2em;
+    .nav-left .logo {
+        height: 30px !important; /* Slightly smaller logo */
+        width: 30px !important;
     }
 
     .nav-right {
-        font-size: 0.85em;
+        flex-direction: column; /* Stack links vertically */
+        align-items: flex-end; /* Align links to the right */
+        gap: 5px; /* Smaller gap */
+    }
+    
+    .nav-right a {
+        font-size: 0.8em;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+    h2 {
+        font-size: 1.2em;
+    }
+    h3 {
+        font-size: 1em;
+    }
+
+    .profile-header h1 {
+        font-size: 1.8em; /* Ensure profile name is still prominent */
     }
 }
 /* ---------------------------
@@ -501,14 +526,10 @@ ul li::before {
     border-radius: 50%;
     object-fit: cover;
     margin-right: 15px;
-    float: left;
+    flex-shrink: 0; /* Prevents avatar from shrinking */
     border: 2px solid #eee;
 }
-.profile-card::after { /* Clearfix for float */
-    content: "";
-    display: table;
-    clear: both;
-}
+
 /* ---------------------------
    Flash Messages
 --------------------------- */
@@ -552,3 +573,66 @@ ul li::before {
     color: #0c5460;
     border: 1px solid #bee5eb;
 }
+
+/* Banner de Perfil */
+.profile-banner {
+    width: calc(100% + 80px); /* Adjust for profile-container padding */
+    height: 200px; /* Altura fixa para o banner */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: -30px -40px 20px -40px; /* Negative margin to fill container width/top */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-header-with-banner {
+    margin-top: -100px; /* Move header up to overlap with banner */
+    position: relative; /* Ensure z-index works */
+    z-index: 10; /* Bring avatar and name to front */
+    color: #fff; /* White text for header on banner */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Add text shadow for readability */
+}
+
+.profile-header-with-banner h1 {
+    /* Rely on inline style from profile.html for color */
+}
+
+.profile-header-with-banner .profile-avatar {
+    /* Rely on inline style from profile.html for border-color */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.25); /* Stronger shadow for avatar */
+}
+/* Added for social media feed layout */
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Space between header and bio/button */
+}
+
+.profile-card-header div {
+    flex-grow: 1;
+}
+
+.profile-card h3 {
+    margin: 0 0 5px 0; /* Adjust margin for h3 inside flex */
+    color: #e24040;
+    font-size: 1.5em;
+}
+
+.profile-card p {
+    margin: 0; /* Remove bottom margin from p */
+}
+
+.profile-card a.btn {
+    margin-top: auto; /* Push button to the bottom of the card */
+}
+
+/* Existing responsive styles for container need adjustment for grid */
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr; /* Single column on small screens */
+    }
+}
+

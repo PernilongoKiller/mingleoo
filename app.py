@@ -8,8 +8,11 @@ from sqlalchemy.sql import func
 from sqlalchemy import or_ # For complex queries
 import os
 
+
 app = Flask(__name__)
 app.secret_key = "uma_senha_super_secreta_qualquer"
+
+
 
 # Configuração do banco de dados PostgreSQL com SQLAlchemy
 # DATABASE_URL = "postgresql://mingleoo_db_user:ekTxiRGjD5nVj5P3zLTFdcRt6p34PmWE@dpg-d5tu2f7pm1nc73fnbt1g-a.virginia-postgres.render.com/mingleoo_db"
@@ -43,6 +46,9 @@ class User(Base):
     name = Column(String(80), nullable=False)
     bio = Column(Text)
     avatar_url = Column(String(255), nullable=False, default='/static/images/1.png')
+    banner_url = Column(String(255), nullable=False, default='')
+    profile_color = Column(String(7), nullable=False, default='#e24040') # Default to a red color
+    background_color = Column(String(7), nullable=False, default='#f8f8f8') # Default to a light gray color
     tags = relationship('Tag', secondary=user_tags, back_populates='users')
     links = relationship('UserLink', backref='user', cascade="all, delete-orphan")
     sections = relationship('UserSection', backref='user', cascade="all, delete-orphan")
@@ -392,7 +398,10 @@ def view_profile(user_id):
         'id': viewed_user.id, 
         'name': viewed_user.name, 
         'bio': viewed_user.bio, 
-        'avatar_url': viewed_user.avatar_url
+        'avatar_url': viewed_user.avatar_url,
+        'banner_url': viewed_user.banner_url,
+        'profile_color': viewed_user.profile_color,
+        'background_color': viewed_user.background_color
     }
     sections_list = [{'title': s.title, 'content': s.content} for s in viewed_user.sections]
     tags_list = [tag.name for tag in viewed_user.tags]
@@ -423,6 +432,24 @@ def edit_profile():
             user.avatar_url = avatar_url
         else:
             user.avatar_url = '/static/images/1.png' # Reverte para o padrão se o campo for esvaziado
+
+        banner_url = request.form.get("banner_url", "").strip()
+        if banner_url:
+            user.banner_url = banner_url
+        else:
+            user.banner_url = '' # Limpa o banner se o campo for esvaziado
+
+        profile_color = request.form.get("profile_color", "").strip()
+        if profile_color:
+            user.profile_color = profile_color
+        else:
+            user.profile_color = '#e24040' # Reverte para o padrão se o campo for esvaziado
+
+        background_color = request.form.get("background_color", "").strip()
+        if background_color:
+            user.background_color = background_color
+        else:
+            user.background_color = '#f8f8f8' # Reverte para o padrão se o campo for esvaziado
 
         # Tags
         tag_names = request.form.getlist("tags")
@@ -470,7 +497,7 @@ def edit_profile():
         db_session.commit()
         return redirect(url_for("view_profile", user_id=user.id))
 
-    user_dict = {'name': user.name, 'bio': user.bio, 'avatar_url': user.avatar_url}
+    user_dict = {'name': user.name, 'bio': user.bio, 'avatar_url': user.avatar_url, 'banner_url': user.banner_url, 'profile_color': user.profile_color, 'background_color': user.background_color}
     user_tags_list = [tag.name for tag in user.tags]
     user_links_list = [{'platform': l.platform, 'url': l.url} for l in user.links]
     user_sections_list = [{'title': s.title, 'content': s.content} for s in user.sections]

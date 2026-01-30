@@ -14,7 +14,7 @@
 <nav>
     <div class="nav-left">
         <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
-        <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+        <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
     </div>
     <div class="nav-right">
         {% if logged_in_user %}
@@ -51,6 +51,27 @@
         {% if user.avatar_url %}
             <img src="{{ user.avatar_url }}" alt="Seu avatar" style="max-width: 100px; margin-top: 10px; border-radius: 50%;">
         {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Banner de Fundo</h2>
+        <p>Cole a URL de uma imagem para usar como banner do seu perfil.</p>
+        <input type="text" name="banner_url" placeholder="https://exemplo.com/seu-banner.png" value="{{ user.banner_url }}">
+        {% if user.banner_url %}
+            <img src="{{ user.banner_url }}" alt="Seu banner" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Cor Principal do Perfil</h2>
+        <p>Escolha uma cor para personalizar alguns elementos do seu perfil.</p>
+        <input type="color" name="profile_color" value="{{ user.profile_color }}">
+    </div>
+
+    <div class="card">
+        <h2>Cor de Fundo do Perfil</h2>
+        <p>Escolha uma cor para o fundo do seu perfil.</p>
+        <input type="color" name="background_color" value="{{ user.background_color }}">
     </div>
 
 <div class="card">

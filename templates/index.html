@@ -27,7 +27,7 @@
     <nav>
         <div class="nav-left">
             <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
-            <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+            <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
         </div>
         <div class="nav-right">
             {% if logged_in_user %}
@@ -67,9 +67,13 @@
 
         {% for user in users %}
         <div class="profile-card">
-            <img src="{{ user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ user.name }}" class="dashboard-avatar">
-            <h3>{{ user.name }}</h3>
-            <p>{{ user.bio }}</p>
+            <div class="profile-card-header">
+                <img src="{{ user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ user.name }}" class="dashboard-avatar">
+                <div>
+                    <h3>{{ user.name }}</h3>
+                    <p>{{ user.bio }}</p>
+                </div>
+            </div>
 
             {% if logged_in_user %}
                 <a href="{{ url_for('view_profile', user_id=user.id) }}" class="btn">Ver Perfil</a>

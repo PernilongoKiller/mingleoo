@@ -2,128 +2,30 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>{{ user['name'] }} - Mingleoo.com - BETA</title>
+    <title>{{ user.name }} - Mingleoo.com - BETA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="/static/images/1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
     <style>
-        body {
-            font-family: 'Comic Neue', sans-serif;
-            background-color: #fff;
-            color: #000;
-            margin: 0;
-            padding-top: 60px; 
+        .profile-header {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        .profile-container {
-            width: 90%;
-            max-width: 800px;
-            background-color: #fff;
-            border: 1px solid #e24040;
-            border-radius: 10px;
-            padding: 20px 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            color: #e24040;
+            margin-bottom: 20px;
             text-align: center;
-            margin-bottom: 20px;
         }
-
-        h3 {
-            color: #b82828;
-            margin-top: 20px;
-            margin-bottom: 8px;
-        }
-
-        p {
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
             margin-bottom: 15px;
-            line-height: 1.5;
+            border: 4px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
-
-
-        .section {
-            border: 1px solid #e24040;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            background-color: #fff0f0;
+        .profile-header h1 {
+            margin-bottom: 5px;
         }
-
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tags span {
-            background-color: #e24040;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 0.9em;
-        }
-
-
-        .btn-mingle {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background: linear-gradient(to bottom, #ff5e5e, #e24040);
-            border: 1px solid #b82828;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.3s, border-color 0.3s;
-            margin-top: 15px;
-        }
-
-        .btn-mingle:hover {
-            background: linear-gradient(to bottom, #e24040, #b82828);
-            border-color: #911f1f;
-        }
-
-        .contact-links ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .contact-links li {
-            margin-bottom: 8px;
-        }
-
-        .contact-links a {
-            color: #e24040;
-            text-decoration: none;
-        }
-
-        .contact-links a:hover {
-            text-decoration: underline;
-        }
-
-   
-        .back-link {
-            display: block;
-            margin-top: 30px;
-            color: #e24040;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
     </style>
 </head>
 <body>
@@ -134,13 +36,30 @@
         <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
     </div>
     <div class="nav-right">
-        <a href="{{ url_for('notifications') }}">Notificações ({{ notification_count }})</a>
-        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% if logged_in_user %}
+            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% endif %}
     </div>
 </nav>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
     <div class="profile-container">
-        <h1>{{ user['name'] }}</h1>
+        <div class="profile-header">
+            <img src="{{ user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ user.name }}" class="profile-avatar">
+            <h1>{{ user.name }}</h1>
+        </div>
+        <p style="text-align: center;">{{ user.bio }}</p>
 
         {% if sections %}
             {% for section in sections %}
@@ -164,9 +83,21 @@
             {% endif %}
         </div>
 
-        <form method="POST" action="{{ url_for('mingle', user_id=user['id']) }}">
-            <button type="submit" class="btn-mingle">Mingle!</button>
-        </form>
+        {% if current_user_id and user.id != current_user_id %}
+            {% if is_following %}
+                <form method="POST" action="{{ url_for('unfollow_user', user_id=user.id) }}">
+                    <button type="submit" class="btn-mingle">Desmingle</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{{ url_for('follow_user', user_id=user.id) }}">
+                    <button type="submit" class="btn-mingle">Mingle!</button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        {% if logged_in_user and logged_in_user.id != user.id %}
+            <a href="{{ url_for('view_conversation', user_id=user.id) }}" class="btn-mingle" style="margin-top: 10px;">Enviar Mensagem</a>
+        {% endif %}
 
         <h3>Fale comigo!</h3>
         <div class="contact-links">

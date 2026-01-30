@@ -6,106 +6,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="/static/images/1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
     <style>
-        body {
-            font-family: 'Comic Neue', sans-serif;
-            background-color: #fff;
-            color: #000;
-            margin: 0;
-            padding-top: 60px; /* para nav fixa */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .dashboard-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            float: left;
         }
-
-        nav {
-            width: 100%;
-            background-color: #b82828;
-            padding: 6px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #911f1f;
-        }
-
-        .nav-left img.logo {
-            height: 35px;
-        }
-
-        h1 {
-            color: #e24040;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            color: #e24040;
-            margin-top: 40px;
-        }
-
-        p {
-            margin: 5px 0 15px 0;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #ccc;
-            margin: 20px 0;
-        }
-
-        .btn {
-            background-color: #e24040;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #b82828;
-        }
-
-        a {
-            color: #e24040;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Card de perfil */
-        .profile-card {
-            border: 1px solid #e24040;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #fff;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .profile-card h3 {
-            margin: 0 0 10px 0;
-        }
-
-        .profile-card p {
-            margin: 0 0 10px 0;
-        }
-
-        .profile-card a.btn {
-            margin-top: 10px;
+        .profile-card::after {
+            content: "";
+            display: table;
+            clear: both;
         }
     </style>
 </head>
@@ -117,14 +30,27 @@
         <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
     </div>
     <div class="nav-right">
-        <a href="{{ url_for('notifications') }}">Notificações ({{ notification_count }})</a>
-        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% if logged_in_user %}
+            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% endif %}
     </div>
 </nav>
 
 <div class="beta-warning">
     🚧 Estamos em beta. Bugs podem acontecer!
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
 
 <h1>Olá, {{ username }}! ;D</h1>
@@ -146,10 +72,11 @@
 {% if compatible_users %}
     {% for u in compatible_users %}
     <div class="profile-card">
-        <h3>{{ u[1] }}</h3>
-        <p>{{ u[2] }}</p>
-        <p>{{ u[3] }} hashtags em comum</p>
-        <a href="{{ url_for('view_profile', user_id=u[0]) }}" class="btn">Ver perfil</a>
+        <img src="{{ u.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ u.name }}" class="dashboard-avatar">
+        <h3>{{ u.name }}</h3>
+        <p>{{ u.bio }}</p>
+        <p>{{ u.common_tags }} hashtags em comum</p>
+        <a href="{{ url_for('view_profile', user_id=u.id) }}" class="btn">Ver perfil</a>
     </div>
     {% endfor %}
 {% else %}

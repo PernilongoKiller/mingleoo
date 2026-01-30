@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Mingleoo.com - Mensagens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="/static/images/1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .message-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: inherit;
+        }
+        .message-card:hover {
+            background-color: #f9f9f9;
+        }
+        .message-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        .message-info {
+            flex-grow: 1;
+        }
+        .message-info h3 {
+            margin: 0 0 5px 0;
+            color: #b82828;
+            font-size: 1.2em;
+        }
+        .message-info p {
+            margin: 0;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .message-date {
+            font-size: 0.8em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <img src="{{ url_for('static', filename='images/2.2.png') }}" alt="Logo" class="logo">
+        <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+    </div>
+    <div class="nav-right">
+        {% if logged_in_user %}
+            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<div class="container">
+    <h1>Mensagens</h1>
+
+    {% if conversations %}
+        <div class="card">
+            {% for conv in conversations %}
+                <a href="{{ url_for('view_conversation', user_id=conv.user.id) }}" class="message-card">
+                    <img src="{{ conv.user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ conv.user.name }}">
+                    <div class="message-info">
+                        <h3>{{ conv.user.name }}</h3>
+                        <p>{{ conv.last_message.content[:50] }}...</p>
+                    </div>
+                    <span class="message-date">{{ conv.last_message.timestamp.strftime('%H:%M %d/%m') }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Você não tem nenhuma conversa ainda.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('dashboard') }}" class="back-link">⬅ Voltar ao dashboard</a></p>
+</div>
+
+</body>
+</html>

@@ -13,22 +13,35 @@
 
 <nav>
     <div class="nav-left">
-        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
+        <img src="{{ url_for('static', filename='images/2.2.png') }}" alt="Logo" class="logo">
         <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
     </div>
     <div class="nav-right">
-        <a href="{{ url_for('notifications') }}">Notificações ({{ notification_count }})</a>
-        <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% if logged_in_user %}
+            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% endif %}
     </div>
 </nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
     <h1>Perfis com #{{ tag }}</h1>
 
     {% if users %}
         {% for user in users %}
-            <h3>{{ user[1] }}</h3>
-            <p>{{ user[2] }}</p>
-            <a href="{{ url_for('view_profile', user_id=user[0]) }}">Ver perfil</a>
+            <h3>{{ user.name }}</h3>
+            <p>{{ user.bio }}</p>
+            <a href="{{ url_for('view_profile', user_id=user.id) }}">Ver perfil</a>
             <hr>
         {% endfor %}
     {% else %}

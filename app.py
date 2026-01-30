@@ -1,203 +1,310 @@
-from flask import Flask, render_template, request, redirect, session, url_for
-import sqlite3
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+from sqlalchemy import create_engine, Column, Integer, String, Text, TIMESTAMP, ForeignKey, Table, UniqueConstraint, Boolean
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
+from sqlalchemy import or_ # For complex queries
+import os
 
 app = Flask(__name__)
 app.secret_key = "uma_senha_super_secreta_qualquer"
 
-def db():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    return conn
+# Configuração do banco de dados PostgreSQL com SQLAlchemy
+# DATABASE_URL = "postgresql://mingleoo_db_user:ekTxiRGjD5nVj5P3zLTFdcRt6p34PmWE@dpg-d5tu2f7pm1nc73fnbt1g-a.virginia-postgres.render.com/mingleoo_db"
+DATABASE_URL = os.environ.get('DATABASE_URL', "postgresql://mingleoo_db_user:ekTxiRGjD5nVj5P3zLTFdcRt6p34PmWE@dpg-d5tu2f7pm1nc73fnbt1g-a.virginia-postgres.render.com/mingleoo_db")
+engine = create_engine(DATABASE_URL)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
+
+# Modelos ORM
+user_tags = Table('user_tags', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE'), primary_key=True)
+)
+
+class Account(Base):
+    __tablename__ = 'accounts'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    user = relationship('User', uselist=False, back_populates='account', cascade="all, delete-orphan", single_parent=True, lazy=True)
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    account_id = Column(Integer, ForeignKey('accounts.id', ondelete='CASCADE'), unique=True, nullable=False)
+    account = relationship('Account', back_populates='user')
+    name = Column(String(80), nullable=False)
+    bio = Column(Text)
+    avatar_url = Column(String(255), nullable=False, default='/static/images/1.png')
+    tags = relationship('Tag', secondary=user_tags, back_populates='users')
+    links = relationship('UserLink', backref='user', cascade="all, delete-orphan")
+    sections = relationship('UserSection', backref='user', cascade="all, delete-orphan")
+
+    following_users = relationship(
+        'User', 
+        secondary='follows',
+        primaryjoin="User.id == Follow.follower_id",
+        secondaryjoin="User.id == Follow.followed_id",
+        backref='follower_users',
+        viewonly=True
+    )
+
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True, nullable=False)
+    users = relationship('User', secondary=user_tags, back_populates='tags')
+
+class Follow(Base):
+    __tablename__ = 'follows'
+    follower_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    followed_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    timestamp = Column(TIMESTAMP, server_default=func.now())
+    is_read = Column(Boolean, default=False)
+    
+    __table_args__ = (UniqueConstraint('follower_id', 'followed_id', name='_follower_followed_uc'),)
+
+    follower = relationship('User', foreign_keys=[follower_id], backref=backref('following_associations', cascade="all, delete-orphan"))
+    followed = relationship('User', foreign_keys=[followed_id], backref=backref('followed_by_associations', cascade="all, delete-orphan"))
+
+class Message(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    recipient_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    content = Column(Text, nullable=False)
+    timestamp = Column(TIMESTAMP, server_default=func.now())
+    is_read = Column(Boolean, default=False)
+
+    sender = relationship('User', foreign_keys=[sender_id], backref=backref('sent_messages', lazy='dynamic'))
+    recipient = relationship('User', foreign_keys=[recipient_id], backref=backref('received_messages', lazy='dynamic'))
+
+class UserLink(Base):
+    __tablename__ = 'user_links'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    platform = Column(String(50))
+    url = Column(Text)
+
+class UserSection(Base):
+    __tablename__ = 'user_sections'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    title = Column(String(100))
+    content = Column(Text)
 
 
 def init_db():
-    conn = db()
-    cur = conn.cursor()
+    Base.metadata.create_all(bind=engine)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS accounts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        account_id INTEGER UNIQUE NOT NULL,
-        name TEXT NOT NULL,
-        bio TEXT,
-        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS tags (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_tags (
-        user_id INTEGER,
-        tag_id INTEGER,
-        PRIMARY KEY (user_id, tag_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS mingles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        from_user INTEGER,
-        to_user INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (from_user) REFERENCES users(id),
-        FOREIGN KEY (to_user) REFERENCES users(id)
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_links (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        platform TEXT,
-        url TEXT,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_sections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        title TEXT,
-        content TEXT,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-    """)
-
-    conn.commit()
-    conn.close()
-
-def current_user_id():
+def current_user():
     if "account_id" not in session:
         return None
-    conn = db()
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM users WHERE account_id = ?", (session["account_id"],))
-    row = cur.fetchone()
-    conn.close()
-    return row["id"] if row else None
+    return User.query.filter(User.account_id == session["account_id"]).first()
+
+@app.context_processor
+def inject_global_data():
+    logged_in_user = current_user()
+    if logged_in_user:
+        notification_count = Follow.query.filter_by(followed_id=logged_in_user.id, is_read=False).count() # Only unread follows
+        unread_message_count = Message.query.filter_by(recipient_id=logged_in_user.id, is_read=False).count()
+        return dict(
+            logged_in_user=logged_in_user,
+            notification_count=notification_count,
+            unread_message_count=unread_message_count
+        )
+    return dict(logged_in_user=None, notification_count=0, unread_message_count=0)
+
 
 @app.route("/")
 def index():
-    conn = db()
-    cur = conn.cursor()
-    cur.execute("SELECT id, name, bio FROM users")
-    users = cur.fetchall()
-    conn.close()
-
+    users = User.query.all()
     return render_template(
         "index.html",
         users=users,
-        total_users=len(users),
-        logged_in="account_id" in session
+        total_users=len(users)
     )
 
 @app.route("/search")
 def search():
-    tag = request.args.get("tag") 
-    if not tag:
-        return redirect(url_for("index"))  
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT u.id, u.name, u.bio
-        FROM users u
-        JOIN user_tags ut ON u.id = ut.user_id
-        JOIN tags t ON t.id = ut.tag_id
-        WHERE t.name = ?
-    """, (tag,))
-    users = cur.fetchall()
-    conn.close()
-
-    return render_template("search.html", users=users, tag=tag)
-
+    tag_name = request.args.get("tag")
+    if not tag_name:
+        return redirect(url_for("index"))
+    
+    tag = Tag.query.filter_by(name=tag_name).first()
+    users = tag.users if tag else []
+    
+    return render_template("search.html", users=users, tag=tag_name)
 
 @app.route("/notifications")
 def notifications():
-    user_id = current_user_id()
-    if not user_id:
+    user = current_user()
+    if not user:
         return redirect(url_for("login"))
 
-    conn = db()
-    cur = conn.cursor()
+    follows_received = Follow.query.filter_by(followed_id=user.id).order_by(Follow.timestamp.desc()).all()
+    
+    # Mark all unread follow notifications as read
+    db_session.query(Follow).filter_by(followed_id=user.id, is_read=False).update({"is_read": True})
+    db_session.commit()
 
-    cur.execute("""
-        SELECT 
-            m.id AS mingle_id,
-            u.id AS from_user_id,
-            u.name AS from_user_name,
-            m.created_at
-        FROM mingles m
-        JOIN users u ON u.id = m.from_user
-        WHERE m.to_user = ?
-        ORDER BY m.created_at DESC
-    """, (user_id,))
-
-    notifications = cur.fetchall()
-    conn.close()
+    notifications_list = [
+        {
+            "from_user_id": f.follower.id,
+            "from_user_name": f.follower.name,
+            "created_at": f.timestamp,
+            "is_read": f.is_read
+        }
+        for f in follows_received
+    ]
 
     return render_template(
         "notifications.html",
-        notifications=notifications
+        notifications=notifications_list
     )
 
-@app.route("/surpreenda")
+@app.route("/surprise")
 def surprise():
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("SELECT id FROM users ORDER BY RANDOM() LIMIT 1")
-    user = cur.fetchone()
-    conn.close()
-
+    user = User.query.order_by(func.random()).first()
     if not user:
         return redirect(url_for("index"))
+    return redirect(url_for("view_profile", user_id=user.id))
 
-    return redirect(url_for("view_profile", user_id=user[0]))
-
-
-@app.route("/mingle/<int:user_id>", methods=["POST"])
-def mingle(user_id):
-    from_user = current_user_id()
-    if not from_user:
+@app.route("/follow/<int:user_id>", methods=["POST"])
+def follow_user(user_id):
+    follower = current_user()
+    if not follower:
         return redirect(url_for("login"))
 
-    if from_user == user_id:
+    if follower.id == user_id:
+        flash("Você não pode se Mingle com você mesmo.", "error")
         return redirect(url_for("view_profile", user_id=user_id))
 
-    conn = db()
-    cur = conn.cursor()
+    followed = User.query.get(user_id)
+    if not followed:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("dashboard"))
 
-    cur.execute("""
-        INSERT INTO mingles (from_user, to_user)
-        VALUES (?, ?)
-    """, (from_user, user_id))
+    existing_follow = Follow.query.filter_by(follower_id=follower.id, followed_id=followed.id).first()
+    if existing_follow:
+        flash(f"Você já fez Mingle com {followed.name}.", "info")
+        return redirect(url_for("view_profile", user_id=user_id))
 
-    conn.commit()
-    conn.close()
+    new_follow = Follow(follower_id=follower.id, followed_id=followed.id, is_read=False) # Newly created follow is unread
+    db_session.add(new_follow)
+    db_session.commit()
+    flash(f"Você fez Mingle com {followed.name}!", "success")
+    return redirect(url_for("view_profile", user_id=user_id))
+
+@app.route("/unfollow/<int:user_id>", methods=["POST"])
+def unfollow_user(user_id):
+    follower = current_user()
+    if not follower:
+        return redirect(url_for("login"))
+
+    followed = User.query.get(user_id)
+    if not followed:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("dashboard"))
+
+    follow = Follow.query.filter_by(follower_id=follower.id, followed_id=followed.id).first()
+    if follow:
+        db_session.delete(follow)
+        db_session.commit()
+        flash(f"Você desfez o Mingle com {followed.name}.", "info")
+    else:
+        flash("Você não fez Mingle com este usuário.", "error")
 
     return redirect(url_for("view_profile", user_id=user_id))
+
+@app.route("/messages")
+def list_conversations():
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    # Find unique users with whom the current user has exchanged messages
+    conversations = []
+    
+    # Messages sent by current user
+    sent_recipients = db_session.query(User).join(Message, User.id == Message.recipient_id).filter(Message.sender_id == user.id).distinct().all()
+    for recipient in sent_recipients:
+        last_message = Message.query.filter(
+            or_(
+                (Message.sender_id == user.id) & (Message.recipient_id == recipient.id),
+                (Message.sender_id == recipient.id) & (Message.recipient_id == user.id)
+            )
+        ).order_by(Message.timestamp.desc()).first()
+        if last_message: # Ensure there's a message before adding to conversations
+            conversations.append({'user': recipient, 'last_message': last_message})
+
+    # Messages received by current user, excluding those already in sent_recipients
+    received_senders = db_session.query(User).join(Message, User.id == Message.sender_id).filter(
+        Message.recipient_id == user.id,
+        ~User.id.in_([r.id for r in sent_recipients])
+    ).distinct().all()
+    for sender in received_senders:
+        last_message = Message.query.filter(
+            or_(
+                (Message.sender_id == user.id) & (Message.recipient_id == sender.id),
+                (Message.sender_id == sender.id) & (Message.recipient_id == user.id)
+            )
+        ).order_by(Message.timestamp.desc()).first()
+        if last_message: # Ensure there's a message before adding to conversations
+            conversations.append({'user': sender, 'last_message': last_message})
+
+    # Sort conversations by last message timestamp
+    conversations.sort(key=lambda c: c['last_message'].timestamp, reverse=True)
+    
+    return render_template("messages.html", conversations=conversations)
+
+@app.route("/messages/<int:user_id>", methods=["GET", "POST"])
+def view_conversation(user_id):
+    current_user_obj = current_user()
+    if not current_user_obj:
+        return redirect(url_for("login"))
+
+    other_user = User.query.get(user_id)
+    if not other_user:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("list_conversations"))
+
+    if request.method == "POST":
+        content = request.form["content"].strip()
+        if content:
+            new_message = Message(sender_id=current_user_obj.id, recipient_id=user_id, content=content)
+            db_session.add(new_message)
+            db_session.commit()
+            flash("Mensagem enviada!", "success")
+        else:
+            flash("A mensagem não pode estar vazia.", "error")
+        return redirect(url_for("view_conversation", user_id=user_id))
+
+    # Fetch messages between current_user and other_user
+    messages = Message.query.filter(
+        or_(
+            (Message.sender_id == current_user_obj.id) & (Message.recipient_id == user_id),
+            (Message.sender_id == user_id) & (Message.recipient_id == current_user_obj.id)
+        )
+    ).order_by(Message.timestamp).all()
+
+    # Mark received messages as read
+    db_session.query(Message).filter_by(recipient_id=current_user_obj.id, sender_id=user_id, is_read=False).update({"is_read": True})
+    db_session.commit()
+    
+    return render_template("conversation.html", other_user=other_user, messages=messages, current_user_id=current_user_obj.id)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -205,33 +312,22 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        password_hash = generate_password_hash(password)
-
-        conn = db()
-        cur = conn.cursor()
-
-        try:
-            cur.execute(
-                "INSERT INTO accounts (username, password_hash) VALUES (?, ?)",
-                (username, password_hash)
-            )
-            account_id = cur.lastrowid
-
-            cur.execute(
-                "INSERT INTO users (account_id, name) VALUES (?, ?)",
-                (account_id, username)
-            )
-
-            conn.commit()
-        except sqlite3.IntegrityError:
-            conn.close()
+        
+        if Account.query.filter_by(username=username).first():
             return "Usuário já existe"
 
-        conn.close()
+        password_hash = generate_password_hash(password)
+        new_account = Account(username=username, password_hash=password_hash)
+        
+        new_user = User(name=username)
+        new_account.user = new_user
+
+        db_session.add(new_account)
+        db_session.commit()
+
         return redirect(url_for("login"))
 
     return render_template("register.html")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -239,188 +335,154 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        conn = db()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT id, password_hash FROM accounts WHERE username = ?",
-            (username,)
-        )
-        user = cur.fetchone()
-        conn.close()
+        account = Account.query.filter_by(username=username).first()
 
-        if user and check_password_hash(user["password_hash"], password):
-            session["account_id"] = user["id"]
+        if account and check_password_hash(account.password_hash, password):
+            session["account_id"] = account.id
             return redirect(url_for("dashboard"))
 
         return "Usuário ou senha inválidos"
 
     return render_template("login.html")
 
-
 @app.route("/dashboard")
 def dashboard():
-    user_id = current_user_id()
-    if not user_id:
+    user = current_user()
+    if not user:
         return redirect(url_for("login"))
 
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT a.username
-        FROM accounts a
-        JOIN users u ON u.account_id = a.id
-        WHERE u.id = ?
-    """, (user_id,))
-    username = cur.fetchone()["username"]
-
-    cur.execute("SELECT COUNT(*) FROM mingles WHERE to_user = ?", (user_id,))
-    notification_count = cur.fetchone()[0]
-
-    cur.execute("""
-        SELECT t.id
-        FROM tags t
-        JOIN user_tags ut ON t.id = ut.tag_id
-        WHERE ut.user_id = ?
-    """, (user_id,))
-    tag_ids = [r["id"] for r in cur.fetchall()]
-
+    notification_count = Follow.query.filter_by(followed_id=user.id).count()
+    
+    user_tag_ids = [tag.id for tag in user.tags]
     compatible_users = []
-    if tag_ids:
-        placeholders = ",".join("?" * len(tag_ids))
-        query = f"""
-        SELECT u.id, u.name, u.bio, COUNT(*) AS common_tags
-        FROM users u
-        JOIN user_tags ut ON u.id = ut.user_id
-        WHERE ut.tag_id IN ({placeholders}) AND u.id != ?
-        GROUP BY u.id
-        ORDER BY common_tags DESC
-        """
-        cur.execute(query, (*tag_ids, user_id))
-        compatible_users = cur.fetchall()
+    if user_tag_ids:
+        followed_ids = [f.followed_id for f in user.following_associations if f.follower_id == user.id]
+        
+        compatible_users = db_session.query(
+            User.id, User.name, User.bio, User.avatar_url, func.count(user_tags.c.tag_id).label('common_tags')
+        ).join(user_tags).filter(
+            user_tags.c.tag_id.in_(user_tag_ids),
+            User.id != user.id,
+            User.id.notin_(followed_ids)
+        ).group_by(User.id, User.name, User.bio, User.avatar_url).order_by(func.count(user_tags.c.tag_id).desc()).all()
 
-    conn.close()
 
     return render_template(
         "dashboard.html",
-        username=username,
+        username=user.name,
         notification_count=notification_count,
         compatible_users=compatible_users
     )
 
 @app.route("/profile/<int:user_id>")
 def view_profile(user_id):
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("SELECT id, name, bio FROM users WHERE id = ?", (user_id,))
-    user = cur.fetchone()
-
-    if not user:
-        conn.close()
+    viewed_user = User.query.get(user_id)
+    if not viewed_user:
         return redirect(url_for("index"))
+    
+    logged_in_user = current_user()
+    is_following = False
+    if logged_in_user:
+        is_following = Follow.query.filter_by(follower_id=logged_in_user.id, followed_id=viewed_user.id).first() is not None
+        notification_count = Follow.query.filter_by(followed_id=logged_in_user.id).count()
+    else:
+        notification_count = 0
 
-    cur.execute("""
-        SELECT t.name FROM tags t
-        JOIN user_tags ut ON t.id = ut.tag_id
-        WHERE ut.user_id = ?
-    """, (user_id,))
-    user_tags = [t["name"] for t in cur.fetchall()]
-
-    cur.execute("SELECT platform, url FROM user_links WHERE user_id = ?", (user_id,))
-    user_links = cur.fetchall()
-
-    cur.execute("SELECT title, content FROM user_sections WHERE user_id = ?", (user_id,))
-    user_sections = cur.fetchall()
-
-    conn.close()
-
+    user_dict = {
+        'id': viewed_user.id, 
+        'name': viewed_user.name, 
+        'bio': viewed_user.bio, 
+        'avatar_url': viewed_user.avatar_url
+    }
+    sections_list = [{'title': s.title, 'content': s.content} for s in viewed_user.sections]
+    tags_list = [tag.name for tag in viewed_user.tags]
+    links_list = [{'platform': l.platform, 'url': l.url} for l in viewed_user.links]
+    
     return render_template(
-    "profile.html",
-    user=user,
-    sections=user_sections,
-    tags=user_tags,
-    links=user_links
-)
-
-
+        "profile.html",
+        user=user_dict,
+        sections=sections_list,
+        tags=tags_list,
+        links=links_list,
+        is_following=is_following,
+        current_user_id=logged_in_user.id if logged_in_user else None,
+        notification_count=notification_count
+    )
 
 @app.route("/profile", methods=["GET", "POST"])
 def edit_profile():
-    user_id = current_user_id()
-    if not user_id:
+    user = current_user()
+    if not user:
         return redirect(url_for("login"))
 
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("SELECT name, bio FROM users WHERE id = ?", (user_id,))
-    user = cur.fetchone()
-
-    cur.execute("""
-        SELECT t.name FROM tags t
-        JOIN user_tags ut ON t.id = ut.tag_id
-        WHERE ut.user_id = ?
-    """, (user_id,))
-    user_tags = [t["name"] for t in cur.fetchall()]
-
-    cur.execute("SELECT platform, url FROM user_links WHERE user_id = ?", (user_id,))
-    user_links = cur.fetchall()
-
-    cur.execute("SELECT title, content FROM user_sections WHERE user_id = ?", (user_id,))
-    user_sections = cur.fetchall()
-
     if request.method == "POST":
-        bio = request.form.get("bio", "")
-        cur.execute("UPDATE users SET bio = ? WHERE id = ?", (bio, user_id))
+        user.bio = request.form.get("bio", "")
+        
+        avatar_url = request.form.get("avatar_url", "").strip()
+        if avatar_url:
+            user.avatar_url = avatar_url
+        else:
+            user.avatar_url = '/static/images/1.png' # Reverte para o padrão se o campo for esvaziado
 
-        cur.execute("DELETE FROM user_tags WHERE user_id = ?", (user_id,))
-        for tag in request.form.getlist("tags"):
-            tag = tag.strip()
-            if tag:
-                cur.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))
-                cur.execute("SELECT id FROM tags WHERE name = ?", (tag,))
-                tag_id = cur.fetchone()["id"]
-                cur.execute(
-                    "INSERT INTO user_tags (user_id, tag_id) VALUES (?, ?)",
-                    (user_id, tag_id)
-                )
-
-        cur.execute("DELETE FROM user_links WHERE user_id = ?", (user_id,))
-        for link in request.form.getlist("links"):
-            if "|" in link:
-                platform, url = map(str.strip, link.split("|", 1))
-                cur.execute(
-                    "INSERT INTO user_links (user_id, platform, url) VALUES (?, ?, ?)",
-                    (user_id, platform, url)
-                )
-
-        cur.execute("DELETE FROM user_sections WHERE user_id = ?", (user_id,))
-        for t, c in zip(
-            request.form.getlist("section_title"),
-            request.form.getlist("section_content")
-        ):
-            if t.strip():
-                cur.execute(
-                    "INSERT INTO user_sections (user_id, title, content) VALUES (?, ?, ?)",
-                    (user_id, t.strip(), c.strip())
-                )
+        # Tags
+        tag_names = request.form.getlist("tags")
+        # Check if the 'tags' field was explicitly submitted.
+        # If the form renders existing tags, but the user removes them all, tag_names will be empty.
+        # If the user doesn't touch the tag section, 'tags' might not even be in request.form if JS handles it.
+        # To avoid accidental deletion if the form didn't submit anything for tags, we check 'in request.form'.
+        if "tags" in request.form: # This means the tags section was part of the form submission
+            user.tags.clear() # Clear all current tags
+            for name in tag_names:
+                name = name.strip()
+                if name:
+                    tag = Tag.query.filter_by(name=name).first()
+                    if not tag:
+                        tag = Tag(name=name)
+                        db_session.add(tag)
+                    user.tags.append(tag)
+        # If "tags" not in request.form, assume no change intended, keep existing tags.
 
 
+        # Links
+        link_data = request.form.getlist("links")
+        if "links" in request.form: # Only clear if new links are being submitted
+            UserLink.query.filter_by(user_id=user.id).delete()
+            for link_str in link_data:
+                if "|" in link_str:
+                    platform, url = map(str.strip, link_str.split("|", 1))
+                    if platform and url:
+                        new_link = UserLink(user_id=user.id, platform=platform, url=url)
+                        db_session.add(new_link)
+        # Else: if "links" not in request.form, assume no change intended, keep existing links.
 
-        conn.commit()
-        conn.close()
-        return redirect(url_for("view_profile", user_id=user_id))
+        # Seções
+        titles = request.form.getlist("section_title")
+        contents = request.form.getlist("section_content")
+        # Check if the 'section_title' or 'section_content' fields were submitted at all.
+        if "section_title" in request.form or "section_content" in request.form:
+            UserSection.query.filter_by(user_id=user.id).delete() # Delete all existing sections
+            for t, c in zip(titles, contents):
+                if t.strip() or c.strip(): # Only add if title or content is not empty
+                    new_section = UserSection(user_id=user.id, title=t.strip(), content=c.strip())
+                    db_session.add(new_section)
+        # Else: if no section data was submitted, keep current.
 
-    conn.close()
+        db_session.commit()
+        return redirect(url_for("view_profile", user_id=user.id))
+
+    user_dict = {'name': user.name, 'bio': user.bio, 'avatar_url': user.avatar_url}
+    user_tags_list = [tag.name for tag in user.tags]
+    user_links_list = [{'platform': l.platform, 'url': l.url} for l in user.links]
+    user_sections_list = [{'title': s.title, 'content': s.content} for s in user.sections]
+    
     return render_template(
         "edit_profile.html",
-        user=user,
-        user_tags=user_tags,
-        user_links=user_links,
-        user_sections=user_sections
+        user=user_dict,
+        user_tags=user_tags_list,
+        user_links=user_links_list,
+        user_sections=user_sections_list
     )
 
 if __name__ == "__main__":
     init_db()
-    app.run()
+    app.run(debug=True)

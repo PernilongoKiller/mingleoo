@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversa com {{ other_user.name }} - Mingleoo.com</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="/static/images/1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 70vh; /* Limita a altura para scroll */
+            overflow-y: auto;
+            padding-right: 10px; /* Para espaço do scrollbar */
+        }
+        .message-bubble {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .message-bubble.mine {
+            justify-content: flex-end;
+        }
+        .message-bubble.mine .message-content {
+            background-color: #e24040; /* Cor do Mingleoo */
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .message-bubble.other .message-content {
+            background-color: #f0f0f0;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .message-bubble.mine .message-content {
+            order: 1; /* Move content to right */
+        }
+        .message-bubble.mine .message-avatar {
+            order: 2; /* Move avatar to right */
+        }
+        .message-time {
+            font-size: 0.75em;
+            color: #999;
+            align-self: flex-start;
+            margin-top: 5px;
+            white-space: nowrap; /* Evita quebra de linha do timestamp */
+        }
+        .message-bubble.mine .message-time {
+            order: 0; /* Move timestamp to left of content */
+            margin-right: 10px;
+            text-align: right;
+        }
+        .message-bubble.other .message-time {
+            margin-left: 10px;
+            text-align: left;
+        }
+
+        .message-input-form {
+            display: flex;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .message-input-form textarea {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            resize: none;
+            max-height: 100px;
+            font-family: 'Lato', sans-serif;
+        }
+        .message-input-form button {
+            background-color: #e24040;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .message-input-form button:hover {
+            background-color: #b82828;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <img src="{{ url_for('static', filename='images/2.2.png') }}" alt="Logo" class="logo">
+        <a href="{{ url_for('index') }}" class="site-link">Mingleoo.com</a>
+    </div>
+    <div class="nav-right">
+        {% if logged_in_user %}
+            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
+            <a href="{{ url_for('edit_profile') }}">Perfil</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<div class="container">
+    <h1>Conversa com <a href="{{ url_for('view_profile', user_id=other_user.id) }}">{{ other_user.name }}</a></h1>
+
+    <div class="chat-container">
+        {% for message in messages %}
+            <div class="message-bubble {% if message.sender_id == current_user_id %}mine{% else %}other{% endif %}">
+                {% if message.sender_id != current_user_id %}
+                    <img src="{{ other_user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ other_user.name }}" class="message-avatar">
+                {% endif %}
+                <div class="message-content">
+                    {{ message.content }}
+                </div>
+                <span class="message-time">{{ message.timestamp.strftime('%H:%M %d/%m') }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <form method="POST" class="message-input-form">
+        <textarea name="content" placeholder="Escreva sua mensagem..." rows="1" required></textarea>
+        <button type="submit">Enviar</button>
+    </form>
+    
+    <p><a href="{{ url_for('list_conversations') }}" class="back-link">⬅ Voltar às Mensagens</a></p>
+</div>
+
+</body>
+</html>

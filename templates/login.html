@@ -1,31 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Mingleoo.com</title>
-   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="icon" type="image/png" href="/static/images/1.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-</head>
-<body>
+{% block title %}Login - Mingleoo.com{% endblock %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
-<nav>
-    <div class="nav-left">
-        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
-        <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
-    </div>
-</nav>
+{% block content %}
+<div class="beta-warning">
+    🚧 Estamos em beta. Bugs podem acontecer!
+</div>
 
 <h1>Olá novamente :D</h1>
 
@@ -43,11 +23,4 @@
 <p>
     <a href="/">Voltar para o início</a>
 </p>
-
-<footer>
-    <p>&copy; 2026 mingleoo.com. Todos os direitos reservados.</p>
-    <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
-</footer>
-
-</body>
-</html>
+{% endblock %}

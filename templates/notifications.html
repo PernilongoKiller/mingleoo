@@ -1,39 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Mingleoo.com - BETA</title>
-   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="icon" type="image/png" href="/static/images/1.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
+{% block title %}Notificações - Mingleoo.com{% endblock %}
 
-</head>
-<body>
-
-<nav>
-    <div class="nav-left">
-        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
-        <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
-    </div>
-    <div class="nav-right">
-        {% if logged_in_user %}
-            <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
-            <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
-            <a href="{{ url_for('edit_profile') }}">Perfil</a>
-        {% endif %}
-    </div>
-</nav>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% block content %}
+<div class="beta-warning">
+    🚧 Estamos em beta. Bugs podem acontecer!
+</div>
 
     <h1>Notificações</h1>
 
@@ -54,11 +26,4 @@
 {% endif %}
 
 <p><a href="{{ url_for('dashboard') }}">⬅ Voltar ao dashboard</a></p>
-
-<footer>
-    <p>&copy; 2026 mingleoo.com. Todos os direitos reservados.</p>
-    <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
-</footer>
-
-</body>
-</html>
+{% endblock %}

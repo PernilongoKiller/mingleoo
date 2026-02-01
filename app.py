@@ -1,7 +1,15 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash, abort
+from flask_wtf import FlaskForm, RecaptchaField
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired, EqualTo, Email
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, Column, Integer, String, Text, TIMESTAMP, ForeignKey, Table, UniqueConstraint, Boolean
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -10,7 +18,54 @@ import os
 
 
 app = Flask(__name__)
-app.secret_key = "uma_senha_super_secreta_qualquer"
+app.secret_key = os.environ.get('SECRET_KEY', 'uma_senha_super_secreta_qualquer_para_desenvolvimento')
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
+app.config['RECAPTCHA_USE_SSL'] = False
+
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get('RECAPTCHA_PRIVATE_KEY', '')
+app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
+
+# Flask-Mail configuration
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 't')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+
+# Uploads Configuration
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+from werkzeug.utils import secure_filename
+
+
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    recaptcha = RecaptchaField()
+
+
 
 
 
@@ -34,8 +89,11 @@ class Account(Base):
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
+    confirmed = Column(Boolean, nullable=False, default=False)
+    confirmed_on = Column(TIMESTAMP, nullable=True)
     user = relationship('User', uselist=False, back_populates='account', cascade="all, delete-orphan", single_parent=True, lazy=True)
 
 class User(Base):
@@ -47,6 +105,10 @@ class User(Base):
     bio = Column(Text)
     avatar_url = Column(String(255), nullable=False, default='/static/images/1.png')
     banner_url = Column(String(255), nullable=False, default='')
+    age = Column(Integer, nullable=True)
+    nationality = Column(String(80), nullable=True)
+    gender = Column(String(50), nullable=True)
+    sexuality = Column(String(50), nullable=True)
     profile_color = Column(String(7), nullable=False, default='#e24040') # Default to a red color
     background_color = Column(String(7), nullable=False, default='#f8f8f8') # Default to a light gray color
     tags = relationship('Tag', secondary=user_tags, back_populates='users')
@@ -81,8 +143,8 @@ class Follow(Base):
     follower = relationship('User', foreign_keys=[follower_id], backref=backref('following_associations', cascade="all, delete-orphan"))
     followed = relationship('User', foreign_keys=[followed_id], backref=backref('followed_by_associations', cascade="all, delete-orphan"))
 
-class Message(Base):
-    __tablename__ = 'messages'
+class UserMessage(Base):
+    __tablename__ = 'user_messages'
     id = Column(Integer, primary_key=True)
     sender_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     recipient_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
@@ -90,8 +152,8 @@ class Message(Base):
     timestamp = Column(TIMESTAMP, server_default=func.now())
     is_read = Column(Boolean, default=False)
 
-    sender = relationship('User', foreign_keys=[sender_id], backref=backref('sent_messages', lazy='dynamic'))
-    recipient = relationship('User', foreign_keys=[recipient_id], backref=backref('received_messages', lazy='dynamic'))
+    sender = relationship('User', foreign_keys=[sender_id], backref=backref('sent_usermessages', lazy='dynamic'))
+    recipient = relationship('User', foreign_keys=[recipient_id], backref=backref('received_usermessages', lazy='dynamic'))
 
 class UserLink(Base):
     __tablename__ = 'user_links'
@@ -108,10 +170,6 @@ class UserSection(Base):
     content = Column(Text)
 
 
-def init_db():
-    Base.metadata.create_all(bind=engine)
-
-@app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
@@ -125,7 +183,7 @@ def inject_global_data():
     logged_in_user = current_user()
     if logged_in_user:
         notification_count = Follow.query.filter_by(followed_id=logged_in_user.id, is_read=False).count() # Only unread follows
-        unread_message_count = Message.query.filter_by(recipient_id=logged_in_user.id, is_read=False).count()
+        unread_message_count = UserMessage.query.filter_by(recipient_id=logged_in_user.id, is_read=False).count()
         return dict(
             logged_in_user=logged_in_user,
             notification_count=notification_count,
@@ -245,29 +303,29 @@ def list_conversations():
     conversations = []
     
     # Messages sent by current user
-    sent_recipients = db_session.query(User).join(Message, User.id == Message.recipient_id).filter(Message.sender_id == user.id).distinct().all()
+    sent_recipients = db_session.query(User).join(UserMessage, User.id == UserMessage.recipient_id).filter(UserMessage.sender_id == user.id).distinct().all()
     for recipient in sent_recipients:
-        last_message = Message.query.filter(
+        last_message = UserMessage.query.filter(
             or_(
-                (Message.sender_id == user.id) & (Message.recipient_id == recipient.id),
-                (Message.sender_id == recipient.id) & (Message.recipient_id == user.id)
+                (UserMessage.sender_id == user.id) & (UserMessage.recipient_id == recipient.id),
+                (UserMessage.sender_id == recipient.id) & (UserMessage.recipient_id == user.id)
             )
-        ).order_by(Message.timestamp.desc()).first()
+        ).order_by(UserMessage.timestamp.desc()).first()
         if last_message: # Ensure there's a message before adding to conversations
             conversations.append({'user': recipient, 'last_message': last_message})
 
     # Messages received by current user, excluding those already in sent_recipients
-    received_senders = db_session.query(User).join(Message, User.id == Message.sender_id).filter(
-        Message.recipient_id == user.id,
+    received_senders = db_session.query(User).join(UserMessage, User.id == UserMessage.sender_id).filter(
+        UserMessage.recipient_id == user.id,
         ~User.id.in_([r.id for r in sent_recipients])
     ).distinct().all()
     for sender in received_senders:
-        last_message = Message.query.filter(
+        last_message = UserMessage.query.filter(
             or_(
-                (Message.sender_id == user.id) & (Message.recipient_id == sender.id),
-                (Message.sender_id == sender.id) & (Message.recipient_id == user.id)
+                (UserMessage.sender_id == user.id) & (UserMessage.recipient_id == sender.id),
+                (UserMessage.sender_id == sender.id) & (UserMessage.recipient_id == user.id)
             )
-        ).order_by(Message.timestamp.desc()).first()
+        ).order_by(UserMessage.timestamp.desc()).first()
         if last_message: # Ensure there's a message before adding to conversations
             conversations.append({'user': sender, 'last_message': last_message})
 
@@ -290,7 +348,7 @@ def view_conversation(user_id):
     if request.method == "POST":
         content = request.form["content"].strip()
         if content:
-            new_message = Message(sender_id=current_user_obj.id, recipient_id=user_id, content=content)
+            new_message = UserMessage(sender_id=current_user_obj.id, recipient_id=user_id, content=content)
             db_session.add(new_message)
             db_session.commit()
             flash("Mensagem enviada!", "success")
@@ -299,31 +357,39 @@ def view_conversation(user_id):
         return redirect(url_for("view_conversation", user_id=user_id))
 
     # Fetch messages between current_user and other_user
-    messages = Message.query.filter(
+    messages = UserMessage.query.filter(
         or_(
-            (Message.sender_id == current_user_obj.id) & (Message.recipient_id == user_id),
-            (Message.sender_id == user_id) & (Message.recipient_id == current_user_obj.id)
+            (UserMessage.sender_id == current_user_obj.id) & (UserMessage.recipient_id == user_id),
+            (UserMessage.sender_id == user_id) & (UserMessage.recipient_id == current_user_obj.id)
         )
-    ).order_by(Message.timestamp).all()
+    ).order_by(UserMessage.timestamp).all()
 
     # Mark received messages as read
-    db_session.query(Message).filter_by(recipient_id=current_user_obj.id, sender_id=user_id, is_read=False).update({"is_read": True})
+    db_session.query(UserMessage).filter_by(recipient_id=current_user_obj.id, sender_id=user_id, is_read=False).update({"is_read": True})
     db_session.commit()
     
     return render_template("conversation.html", other_user=other_user, messages=messages, current_user_id=current_user_obj.id)
 
 
 @app.route("/register", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
         
         if Account.query.filter_by(username=username).first():
-            return "Usuário já existe"
+            flash("Usuário já existe", "error")
+            return redirect(url_for("register"))
+        
+        if Account.query.filter_by(email=email).first():
+            flash("E-mail já existe", "error")
+            return redirect(url_for("register"))
 
         password_hash = generate_password_hash(password)
-        new_account = Account(username=username, password_hash=password_hash)
+        new_account = Account(username=username, email=email, password_hash=password_hash, confirmed=False)
         
         new_user = User(name=username)
         new_account.user = new_user
@@ -331,9 +397,40 @@ def register():
         db_session.add(new_account)
         db_session.commit()
 
+        token = s.dumps(email, salt='email-confirm')
+
+        msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[email])
+        link = url_for('confirm_email', token=token, _external=True)
+        msg.body = 'Seu link de confirmação é {}'.format(link)
+        mail.send(msg)
+
+        flash('Um e-mail de confirmação foi enviado para o seu e-mail.', 'success')
         return redirect(url_for("login"))
 
-    return render_template("register.html")
+    return render_template("register.html", form=form)
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=3600)
+    except SignatureExpired:
+        return '<h1>O token expirou!</h1>'
+    except:
+        return '<h1>O token é inválido!</h1>'
+
+    account = Account.query.filter_by(email=email).first()
+    if not account:
+        flash("Conta não encontrada.", "error")
+        return redirect(url_for("login"))
+    account.confirmed = True
+    account.confirmed_on = func.now()
+
+    db_session.add(account)
+    db_session.commit()
+
+    flash('Sua conta foi confirmada com sucesso! Faça o login agora.', 'success')
+    return redirect(url_for('login'))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -344,8 +441,12 @@ def login():
         account = Account.query.filter_by(username=username).first()
 
         if account and check_password_hash(account.password_hash, password):
-            session["account_id"] = account.id
-            return redirect(url_for("dashboard"))
+            if account.confirmed:
+                session["account_id"] = account.id
+                return redirect(url_for("dashboard"))
+            else:
+                flash("Sua conta ainda não foi confirmada. Por favor, verifique seu e-mail.", "error")
+                return redirect(url_for("login"))
 
         return "Usuário ou senha inválidos"
 
@@ -427,17 +528,41 @@ def edit_profile():
     if request.method == "POST":
         user.bio = request.form.get("bio", "")
         
-        avatar_url = request.form.get("avatar_url", "").strip()
-        if avatar_url:
-            user.avatar_url = avatar_url
-        else:
-            user.avatar_url = '/static/images/1.png' # Reverte para o padrão se o campo for esvaziado
+        # Handle Avatar Upload or URL Input
+        avatar_updated = False
+        if 'avatar_file' in request.files:
+            avatar_file = request.files['avatar_file']
+            if avatar_file.filename != '' and allowed_file(avatar_file.filename):
+                filename = secure_filename(avatar_file.filename)
+                avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                avatar_file.save(avatar_path)
+                user.avatar_url = '/' + avatar_path # Store relative path
+                avatar_updated = True
+        
+        if not avatar_updated:
+            avatar_url_input = request.form.get("avatar_url_input", "").strip()
+            if avatar_url_input:
+                user.avatar_url = avatar_url_input
+            elif 'avatar_url_input' in request.form: # Check if the field was present, meaning user might have cleared it
+                user.avatar_url = '/static/images/1.png' # Revert to default if cleared
 
-        banner_url = request.form.get("banner_url", "").strip()
-        if banner_url:
-            user.banner_url = banner_url
-        else:
-            user.banner_url = '' # Limpa o banner se o campo for esvaziado
+        # Handle Banner Upload or URL Input
+        banner_updated = False
+        if 'banner_file' in request.files:
+            banner_file = request.files['banner_file']
+            if banner_file.filename != '' and allowed_file(banner_file.filename):
+                filename = secure_filename(banner_file.filename)
+                banner_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                banner_file.save(banner_path)
+                user.banner_url = '/' + banner_path # Store relative path
+                banner_updated = True
+        
+        if not banner_updated:
+            banner_url_input = request.form.get("banner_url_input", "").strip()
+            if banner_url_input:
+                user.banner_url = banner_url_input
+            elif 'banner_url_input' in request.form: # Check if the field was present, meaning user might have cleared it
+                user.banner_url = '' # Clear banner if cleared (no default)
 
         profile_color = request.form.get("profile_color", "").strip()
         if profile_color:
@@ -451,8 +576,18 @@ def edit_profile():
         else:
             user.background_color = '#f8f8f8' # Reverte para o padrão se o campo for esvaziado
 
+        # Handle New Personal Info Fields
+        user.age = request.form.get("age", type=int)
+        user.nationality = request.form.get("nationality", "").strip()
+        user.gender = request.form.get("gender", "").strip()
+        user.sexuality = request.form.get("sexuality", "").strip()
+
         # Tags
         tag_names = request.form.getlist("tags")
+        if not tag_names:
+            flash("Pelo menos uma hashtag é obrigatória!", "error")
+            return redirect(url_for("edit_profile"))
+        
         # Check if the 'tags' field was explicitly submitted.
         # If the form renders existing tags, but the user removes them all, tag_names will be empty.
         # If the user doesn't touch the tag section, 'tags' might not even be in request.form if JS handles it.
@@ -511,5 +646,4 @@ def edit_profile():
     )
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)

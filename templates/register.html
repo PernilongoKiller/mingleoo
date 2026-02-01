@@ -1,50 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Mingleoo.com - BETA</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="icon" type="image/png" href="/static/images/1.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
+{% extends "base.html" %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% block title %}Registrar - Mingleoo.com{% endblock %}
 
-<nav>
-    <div class="nav-left">
-        <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
-        <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
-    </div>
-</nav>
+{% block content %}
+<div class="beta-warning">
+    🚧 Estamos em beta. Bugs podem acontecer!
+</div>
 
-    <h1>Bem vindo ao Mingleoo.com</h1>
+<h1>Bem vindo ao Mingleoo.com</h1>
 
     <form method="POST">
-        <input
-            type="text"
-            name="username"
-            placeholder="Nome de usuário"
-            required
-        ><br><br>
-
-        <input
-            type="password"
-            name="password"
-            placeholder="Senha"
-            required
-        ><br><br>
-
-    
-
+        {{ form.hidden_tag() }}
+        {{ form.username.label }} {{ form.username(size=20) }}
+        {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+        <br><br>
+        {{ form.email.label }} {{ form.email(size=20) }}
+        {% for error in form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+        <br><br>
+        {{ form.password.label }} {{ form.password(size=20) }}
+        {% for error in form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+        <br><br>
+        {{ form.confirm_password.label }} {{ form.confirm_password(size=20) }}
+        {% for error in form.confirm_password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+        <br><br>
+        {{ form.recaptcha }}
+        {% for error in form.recaptcha.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+        <br><br>
         <button type="submit">Criar conta</button>
     </form>
 
@@ -56,11 +47,4 @@
     <p>
         <a href="/">Voltar para o início</a>
     </p>
-
-<footer>
-    <p>&copy; 2026 mingleoo.com. Todos os direitos reservados.</p>
-    <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
-</footer>
-
-</body>
-</html>
+{% endblock %}

@@ -9,3 +9,8 @@ Werkzeug==3.1.5
 psycopg2-binary
 SQLAlchemy
 gunicorn
+Flask-WTF
+requests
+Flask-Mail
+Flask-Limiter
+email_validator

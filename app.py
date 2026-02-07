@@ -634,14 +634,18 @@ def edit_profile():
         # Seções
         titles = request.form.getlist("section_title")
         contents = request.form.getlist("section_content")
-        # Check if the 'section_title' or 'section_content' fields were submitted at all.
-        if "section_title" in request.form or "section_content" in request.form:
+        
+        # If the section title input field was present in the submitted form
+        if "section_title" in request.form: 
             UserSection.query.filter_by(user_id=user.id).delete() # Delete all existing sections
+            
+            # Re-add only the submitted sections that have content
             for t, c in zip(titles, contents):
-                if t.strip() or c.strip(): # Only add if title or content is not empty
+                if t.strip() or c.strip(): # Only add if title OR content is not empty
                     new_section = UserSection(user_id=user.id, title=t.strip(), content=c.strip())
                     db_session.add(new_section)
-        # Else: if no section data was submitted, keep current.
+        # Else: if "section_title" was not in request.form, the sections block was not submitted,
+        #       so we leave existing sections as they are.
 
         db_session.commit()
         return redirect(url_for("view_profile", user_id=user.id))

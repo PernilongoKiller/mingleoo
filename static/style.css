@@ -357,15 +357,17 @@ ul li::before {
 
 
 .beta-warning {
-    position: fixed;
-    bottom: 0;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     width: 100%;
     background: #b82828;
     color: white;
     text-align: center;
     padding: 10px;
     font-size: 14px;
-    z-index: 999;
+    z-index: 9999 !important; /* Ensure it's on top of everything */
     box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
 }
 /* ---------------------------

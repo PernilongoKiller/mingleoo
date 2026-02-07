@@ -35,14 +35,14 @@ html, body {
 body {
     background-color: #f8f8f8; /* Fundo mais suave */
     line-height: 1.6;
-    padding-top: 70px; /* Mais espaço para navbar fixa */
+    padding-top: 100px; /* Space for navbar (70px) + beta-warning (30px) */
     display: flex;
     flex-direction: column;
     align-items: center;
     font-size: 16px;
     min-height: 100vh; /* Ensure body takes full viewport height */
     position: relative; /* For beta-warning to position correctly if not fixed */
-    padding-bottom: 0px; /* Reset padding-bottom, will be adjusted by media queries for mobile */
+    padding-bottom: 50px; /* Space for fixed beta-warning (if still at bottom) */
 }
 
 .main-content {
@@ -399,7 +399,7 @@ ul li::before {
 
 .beta-warning {
     position: fixed !important;
-    bottom: 0 !important;
+    top: 70px !important; /* Fixed below navbar */
     left: 0 !important;
     right: 0 !important;
     width: 100%;
@@ -408,8 +408,8 @@ ul li::before {
     text-align: center;
     padding: 10px;
     font-size: 14px;
-    z-index: 9999 !important; /* Ensure it's on top of everything */
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 990 !important; /* Below navbar (1000) but above content */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 /* ---------------------------
    Responsividade para Celular

@@ -104,6 +104,7 @@ nav {
     justify-content: flex-end; /* Push content to the right end */
     gap: 20px; /* Consistent gap between nav items */
     transition: all 0.3s ease;
+    flex-grow: 1; /* Make it take up all available space */
 }
 
 .nav-right a {
@@ -534,4 +535,4 @@ ul li::before {
     .profile-header h1 {
         font-size: 1.8em; /* Ensure profile name is still prominent */
     }
-}"""
+}

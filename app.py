@@ -207,16 +207,36 @@ def index():
     if current_user():
         return redirect(url_for("dashboard"))
     
-    # Fetch paginated users, ordered by creation date
-    pagination = User.query.join(Account).order_by(Account.created_at.desc()).paginate(
-        page=page, per_page=PER_PAGE, error_out=False
-    )
+    # Calculate offset and limit for manual pagination
+    offset = (page - 1) * PER_PAGE
     
+    # Fetch users with offset and limit
+    base_query = User.query.join(Account).order_by(Account.created_at.desc())
+    users = base_query.offset(offset).limit(PER_PAGE).all()
+    
+    # Manually calculate pagination info
+    total_users = base_query.count()
+    has_next = (page * PER_PAGE) < total_users
+    has_prev = page > 1
+    next_num = page + 1 if has_next else None
+    prev_num = page - 1 if has_prev else None
+    
+    pagination_info = {
+        'page': page,
+        'per_page': PER_PAGE,
+        'total': total_users,
+        'has_next': has_next,
+        'has_prev': has_prev,
+        'next_num': next_num,
+        'prev_num': prev_num,
+        'items': users # Current page items
+    }
+
     return render_template(
         "index.html",
-        pagination=pagination,
-        users=pagination.items, # Pass items for current page
-        total_users=pagination.total # Total count of users
+        pagination=pagination_info, # Pass the dictionary with pagination info
+        users=pagination_info['items'], # Pass items for current page
+        total_users=pagination_info['total'] # Total count of users
     )
 
 
@@ -465,6 +485,13 @@ def login():
         return "Usuário ou senha inválidos"
 
     return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("account_id", None)
+    flash("Você foi desconectado.", "info")
+    return redirect(url_for("index"))
+
 
 @app.route("/dashboard")
 def dashboard():

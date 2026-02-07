@@ -35,7 +35,7 @@ html, body {
 body {
     background-color: #f8f8f8; /* Fundo mais suave */
     line-height: 1.6;
-    padding-top: 100px; /* Space for navbar (70px) + beta-warning (30px) */
+    padding-top: 105px; /* Space for beta-warning (35px) + navbar (70px) */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -59,7 +59,7 @@ body {
 --------------------------- */
 .top-nav-desktop { /* Styling for the top navigation bar, primarily for desktop */
     position: fixed;
-    top: 0;
+    top: 35px; /* Below beta-warning */
     left: 0;
     width: 100%;
     background: linear-gradient(to right, #000, #1a1a1a); /* Subtle dark gradient */
@@ -315,7 +315,7 @@ input[type="text"], textarea, input[type="password"], select, input[type="number
     background-color: #fefefe; /* Slightly off-white for inputs */
 }
 
-input[type="text"]:focus, textarea:focus, input[type="password"]:focus, select:focus, input[type="number"]:focus {
+input[type="text"]:focus, textarea:focus, input[type="password']:focus, select:focus, input[type="number"]:focus {
     border-color: #a0a0a0; /* Mais escuro para foco */
     box-shadow: 0 0 0 4px rgba(160, 160, 160, 0.25); /* Sombra mais neutra e proeminente */
     outline: none;
@@ -399,7 +399,7 @@ ul li::before {
 
 .beta-warning {
     position: fixed !important;
-    top: 70px !important; /* Fixed below navbar */
+    top: 0 !important; /* Fixed at the very top */
     left: 0 !important;
     right: 0 !important;
     width: 100%;
@@ -407,8 +407,9 @@ ul li::before {
     color: white;
     text-align: center;
     padding: 10px;
+    height: 35px; /* Fixed height for beta warning */
     font-size: 14px;
-    z-index: 990 !important; /* Below navbar (1000) but above content */
+    z-index: 1001 !important; /* Above top nav (1000) */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 /* ---------------------------
@@ -416,7 +417,7 @@ ul li::before {
 --------------------------- */
 @media (max-width: 768px) {
     body {
-        padding-top: 60px; /* Adjust padding for smaller nav */
+        padding-top: calc(60px + 35px); /* Space for top nav (60px) + beta warning (35px) on mobile */
         font-size: 15px;
         padding-bottom: 70px; /* Space for bottom mobile nav */
     }

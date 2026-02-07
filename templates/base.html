@@ -26,6 +26,7 @@
                 <a href="{{ url_for('notifications') }}" title="Notificações"><i class="fa-solid fa-bell"></i>{% if notification_count > 0 %}<span style="color: yellow;"> {{ notification_count }}</span>{% endif %}</a>
                 <a href="{{ url_for('view_profile', user_id=logged_in_user.id) }}" title="Ver Meu Perfil"><i class="fa-solid fa-user"></i></a>
                 <a href="{{ url_for('edit_profile') }}" title="Editar Perfil"><i class="fa-solid fa-gear"></i></a>
+                <a href="{{ url_for('logout') }}" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a> <!-- Added Logout Link -->
             {% else %}
                 <a href="/register">Conecte-se</a>
             {% endif %}
@@ -34,7 +35,7 @@
     </nav>
 
 <div class="beta-warning">
-    🚧 BETA 0.24. Bugs podem acontecer!
+    🚧 BETA 0.25. Bugs podem acontecer!
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -63,6 +64,7 @@
         <a href="{{ url_for('notifications') }}" title="Notificações"><i class="fa-solid fa-bell"></i>{% if notification_count > 0 %}<span style="color: yellow;"> {{ notification_count }}</span>{% endif %}</a>
         <a href="{{ url_for('view_profile', user_id=logged_in_user.id) }}" title="Ver Meu Perfil"><i class="fa-solid fa-user"></i></a>
         <a href="{{ url_for('edit_profile') }}" title="Editar Perfil"><i class="fa-solid fa-gear"></i></a>
+        <a href="{{ url_for('logout') }}" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></a> <!-- Added Logout Link -->
     </nav>
     {% endif %}
 

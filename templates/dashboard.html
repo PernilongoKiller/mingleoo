@@ -20,6 +20,14 @@
 
 {% block content %}
     <h1>Olá, {{ username }}! ;D</h1>
+
+    {% if is_uncustomized_profile %}
+    <div class="card" style="text-align: center; background-color: #d4edda; border-color: #c3e6cb; color: #155724; margin-bottom: 20px;">
+        <p>🎉 Bem-vindo ao Mingleoo! Seu perfil ainda está básico. Personalize-o para começar a conectar!</p>
+        <a href="{{ url_for('edit_profile') }}" class="btn" style="background-color: #155724; color: #fff; margin-top: 10px;">Personalizar Perfil</a>
+    </div>
+    {% endif %}
+
     <p>Explore perfis e encontre pessoas como você.</p>
 
     <form action="/search" method="GET">

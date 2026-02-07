@@ -201,6 +201,8 @@ def inject_global_data():
 
 @app.route("/")
 def index():
+    if current_user():
+        return redirect(url_for("dashboard"))
     users = User.query.all()
     return render_template(
         "index.html",
@@ -462,6 +464,11 @@ def dashboard():
 
     notification_count = Follow.query.filter_by(followed_id=user.id).count()
     
+    is_uncustomized_profile = (
+        user.bio is None or user.bio == "" or 
+        user.avatar_url == '/static/images/1.png'
+    )
+
     user_tag_ids = [tag.id for tag in user.tags]
     compatible_users = []
     if user_tag_ids:
@@ -480,7 +487,8 @@ def dashboard():
         "dashboard.html",
         username=user.name,
         notification_count=notification_count,
-        compatible_users=compatible_users
+        compatible_users=compatible_users,
+        is_uncustomized_profile=is_uncustomized_profile
     )
 
 @app.route("/profile/<int:user_id>")

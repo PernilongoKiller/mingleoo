@@ -71,15 +71,7 @@
         </div>
         <div>
             <label for="sexuality">Sexualidade:</label>
-            <select id="sexuality" name="sexuality">
-                <option value="">Selecione...</option>
-                <option value="Heterossexual" {% if user.sexuality == "Heterossexual" %}selected{% endif %}>Heterossexual</option>
-                <option value="Homossexual" {% if user.sexuality == "Homossexual" %}selected{% endif %}>Homossexual</option>
-                <option value="Bissexual" {% if user.sexuality == "Bissexual" %}selected{% endif %}>Bissexual</option>
-                <option value="Pansexual" {% if user.sexuality == "Pansexual" %}selected{% endif %}>Pansexual</option>
-                <option value="Assexual" {% if user.sexuality == "Assexual" %}selected{% endif %}>Assexual</option>
-                <option value="Outro" {% if user.sexuality == "Outro" %}selected{% endif %}>Outro</option>
-            </select>
+            <input type="text" id="sexuality" name="sexuality" value="{{ user.sexuality or '' }}" placeholder="Ex: Heterossexual, Bissexual, Outro">
         </div>
     </div>
 

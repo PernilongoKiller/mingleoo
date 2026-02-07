@@ -390,7 +390,7 @@ def register():
             return redirect(url_for("register"))
 
         password_hash = generate_password_hash(password)
-        new_account = Account(username=username, email=email, password_hash=password_hash, confirmed=False)
+        new_account = Account(username=username, email=email, password_hash=password_hash, confirmed=True) # Temporarily set to True
         
         new_user = User(name=username)
         new_account.user = new_user
@@ -398,25 +398,26 @@ def register():
         db_session.add(new_account)
         db_session.commit()
 
-        # Check for essential mail configurations
-        if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD') or not app.config.get('MAIL_DEFAULT_SENDER'):
-            flash('Erro de configuração de e-mail: credenciais de envio não definidas. Por favor, contate o administrador.', 'error')
-            # Optionally, you might want to delete the account or mark it for manual confirmation if email can't be sent.
-            # For now, we proceed, but the user won't get an email.
-            return redirect(url_for("login"))
+        # # Check for essential mail configurations - COMMENTED OUT FOR TEMPORARY DISABLE
+        # if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD') or not app.config.get('MAIL_DEFAULT_SENDER'):
+        #     flash('Erro de configuração de e-mail: credenciais de envio não definidas. Por favor, contate o administrador.', 'error')
+        #     # Optionally, you might want to delete the account or mark it for manual confirmation if email can't be sent.
+        #     # For now, we proceed, but the user won't get an email.
+        #     return redirect(url_for("login"))
 
-        try:
-            token = s.dumps(email, salt='email-confirm')
-            msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[email])
-            link = url_for('confirm_email', token=token, _external=True)
-            msg.body = f'Olá {username},\n\nObrigado por se registrar no Mingleoo! Por favor, confirme seu endereço de e-mail clicando no link abaixo:\n\n{link}\n\nSe você não se registrou no Mingleoo, por favor ignore este e-mail.\n\nAtenciosamente,\nA Equipe Mingleoo'
-            mail.send(msg)
-            flash('Um e-mail de confirmação foi enviado para o seu e-mail.', 'success')
-        except Exception as e:
-            flash(f'Erro ao enviar e-mail de confirmação: {e}. Por favor, tente novamente ou contate o administrador.', 'error')
-            # Log the error for debugging purposes
-            app.logger.error(f"Failed to send confirmation email to {email}: {e}")
+        # try: # COMMENTED OUT FOR TEMPORARY DISABLE
+        #     token = s.dumps(email, salt='email-confirm')
+        #     msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[email])
+        #     link = url_for('confirm_email', token=token, _external=True)
+        #     msg.body = f'Olá {username},\n\nObrigado por se registrar no Mingleoo! Por favor, confirme seu endereço de e-mail clicando no link abaixo:\n\n{link}\n\nSe você não se registrou no Mingleoo, por favor ignore este e-mail.\n\nAtenciosamente,\nA Equipe Mingleoo'
+        #     mail.send(msg)
+        #     flash('Um e-mail de confirmação foi enviado para o seu e-mail.', 'success')
+        # except Exception as e: # COMMENTED OUT FOR TEMPORARY DISABLE
+        #     flash(f'Erro ao enviar e-mail de confirmação: {e}. Por favor, tente novamente ou contate o administrador.', 'error')
+        #     # Log the error for debugging purposes
+        #     app.logger.error(f"Failed to send confirmation email to {email}: {e}")
         
+        flash('Registro concluído com sucesso! Bem-vindo ao Mingleoo.', 'success') # New flash message
         return redirect(url_for("login"))
 
     return render_template("register.html", form=form)

@@ -9,14 +9,25 @@ body, input, textarea, button {
     color: #333; /* Cor de texto mais suave */
 }
 
-/* ---------------------------
-   Reset básico
---------------------------- */
+/* Base border-radius for a consistent, slightly rounded look */
+:root {
+    --default-border-radius: 8px; /* Defined consistent border radius */
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Removed global application of border-radius to prevent issues, apply to specific elements instead */
 }
+
+/* ---------------------------
+   Reset básico
+--------------------------- */
+html, body {
+    height: 100%; /* Ensure body stretches to full height */
+}
+
 
 /* ---------------------------
    Body
@@ -29,7 +40,19 @@ body {
     flex-direction: column;
     align-items: center;
     font-size: 16px;
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    position: relative; /* For beta-warning to position correctly if not fixed */
+    padding-bottom: 50px; /* Space for fixed beta-warning */
 }
+
+.main-content {
+    flex-grow: 1; /* Allow main content to push footer to bottom */
+    width: 100%; /* Ensure it spans full width for .container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 /* ---------------------------
    Navegação
@@ -39,15 +62,16 @@ nav {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #000; /* Navbar preta */
+    background: linear-gradient(to right, #000, #1a1a1a); /* Subtle dark gradient */
     color: #fff;
-    padding: 12px 25px; /* Mais padding na nav */
+    padding: 15px 30px; /* Mais padding na nav */
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-    border-bottom: 1px solid #222; /* Borda mais escura */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-bottom: 1px solid #333; /* Borda mais escura */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2); /* Sombra mais pronunciada */
+    border-radius: 0; /* Navbars typically don't have rounded corners */
 }
 
 .nav-left {
@@ -74,13 +98,24 @@ nav {
     opacity: 0.8;
 }
 
+.nav-right {
+    display: flex; /* Make nav-right a flex container */
+    align-items: center; /* Vertically center items */
+    justify-content: flex-end; /* Push content to the right end */
+    gap: 20px; /* Consistent gap between nav items */
+    transition: all 0.3s ease;
+}
+
 .nav-right a {
     color: #fff;
-    margin-left: 20px; /* Mais espaço entre links */
+    /* margin-left: 20px; -- Removed as gap on parent handles spacing */
     text-decoration: none;
     font-weight: bold;
     font-size: 1.05em;
     transition: color 0.3s ease;
+    display: inline-flex; /* Align icon and text vertically */
+    align-items: center;
+    gap: 5px; /* Space between icon and text */
 }
 
 .nav-right a:hover {
@@ -108,15 +143,15 @@ nav {
 .card {
     background-color: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 10px; /* Borda mais arredondada */
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     padding: 25px; /* Mais padding */
     margin-bottom: 25px; /* Mais margem inferior */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08); /* Sombra mais destacada */
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Sombra mais destacada */
+    transition: box-shadow 0.2s ease; /* Removed transform */
 }
 
 .card:hover {
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Stronger shadow */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Sombra mais pronunciada no hover */
 }
 
 .profile-container {
@@ -124,26 +159,26 @@ nav {
     max-width: 900px;
     background-color: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     padding: 30px 40px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Stronger shadow */
     margin-bottom: 50px;
 }
 
 .profile-card {
     border: 1px solid #e0e0e0;
-    border-radius: 10px;
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     padding: 25px;
     background-color: #fff;
     height: 100%; /* Make card fill grid area */
     display: flex;
     flex-direction: column; /* Stack content vertically */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Stronger shadow */
+    transition: box-shadow 0.2s ease; /* Removed transform */
 }
 
 .profile-card:hover {
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Stronger shadow on hover */
 }
 
 .profile-card h3 {
@@ -162,7 +197,7 @@ nav {
 
 .section {
     border: 1px solid #ffebeb; /* Cor mais suave */
-    border-radius: 8px;
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     padding: 18px; /* Mais padding */
     margin-bottom: 18px;
     background-color: #ffebeb;
@@ -181,10 +216,11 @@ nav {
 .tags span {
     background-color: #e24040;
     color: #fff;
-    padding: 6px 14px; /* Mais padding na tag */
-    border-radius: 20px; /* Mais arredondado */
+    padding: 8px 16px; /* Aumento do padding */
+    border-radius: var(--default-border-radius); /* Usar border-radius consistente */
     font-size: 0.95em;
     font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Sombra sutil para profundidade */
 }
 
 .contact-links ul {
@@ -215,15 +251,16 @@ a:hover {
     color: #fff;
     border: none;
     padding: 12px 22px; /* Mais padding */
-    border-radius: 6px; /* Mais arredondado */
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     cursor: pointer;
     font-weight: bold;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
     font-size: 1.05em;
     box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2); /* Subtle text shadow for pop */
 }
 
 .btn:hover, .btn-99:hover {
@@ -237,6 +274,7 @@ a:hover {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    text-shadow: none;
 }
 
 .btn-mingle {
@@ -246,13 +284,14 @@ a:hover {
     color: #fff;
     background: linear-gradient(to bottom, #ff5e5e, #e24040);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
     margin-top: 20px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     font-weight: bold;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2); /* Subtle text shadow for pop */
 }
 
 .btn-mingle:hover {
@@ -263,20 +302,21 @@ a:hover {
 /* ---------------------------
    Inputs e textarea
 --------------------------- */
-input[type="text"], textarea, input[type="password"] {
+input[type="text"], textarea, input[type="password"], select, input[type="number"] {
     width: 100%;
-    padding: 12px; /* Mais padding */
-    margin: 8px 0; /* Mais margem */
+    padding: 12px;
+    margin: 8px 0;
     border: 1px solid #ccc;
-    border-radius: 6px; /* Mais arredondado */
+    border-radius: var(--default-border-radius); /* Use consistent border-radius */
     font-family: 'Lato', sans-serif;
     font-size: 1em;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fefefe; /* Slightly off-white for inputs */
 }
 
-input[type="text"]:focus, textarea:focus, input[type="password"]:focus {
-    border-color: #e24040;
-    box-shadow: 0 0 0 3px rgba(226, 64, 64, 0.2); /* Sombra mais suave e clara */
+input[type="text"]:focus, textarea:focus, input[type="password"]:focus, select:focus, input[type="number"]:focus {
+    border-color: #a0a0a0; /* Mais escuro para foco */
+    box-shadow: 0 0 0 4px rgba(160, 160, 160, 0.25); /* Sombra mais neutra e proeminente */
     outline: none;
 }
 
@@ -472,252 +512,8 @@ ul li::before {
     }
 
     .nav-right {
-        flex-direction: column; /* Stack links vertically */
-        align-items: flex-end; /* Align links to the right */
-        gap: 5px; /* Smaller gap */
-    }
-    
-    .nav-right a {
-        font-size: 0.8em;
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-    h2 {
-        font-size: 1.2em;
-    }
-    h3 {
-        font-size: 1em;
-    }
-
-    .profile-header h1 {
-        font-size: 1.8em; /* Ensure profile name is still prominent */
-    }
-}
-/* ---------------------------
-   Avatars
---------------------------- */
-.profile-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-    text-align: center;
-}
-.profile-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    border: 4px solid #fff;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-}
-.profile-header h1 {
-    margin-bottom: 5px;
-}
-
-.dashboard-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-    flex-shrink: 0; /* Prevents avatar from shrinking */
-    border: 2px solid #eee;
-}
-
-/* ---------------------------
-   Flash Messages
---------------------------- */
-.flashes {
-    list-style: none;
-    padding: 10px 20px;
-    margin: 15px auto;
-    width: 90%;
-    max-width: 800px;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.flashes li {
-    margin-bottom: 0;
-    padding: 0;
-    position: static;
-    padding-left: 0;
-}
-
-.flashes li::before {
-    content: none;
-}
-
-.flashes .error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.flashes .success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.flashes .info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-}
-
-/* Banner de Perfil */
-.profile-banner {
-    width: calc(100% + 80px); /* Adjust for profile-container padding */
-    height: 200px; /* Altura fixa para o banner */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    margin: -30px -40px 20px -40px; /* Negative margin to fill container width/top */
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.profile-header-with-banner {
-    margin-top: -100px; /* Move header up to overlap with banner */
-    position: relative; /* Ensure z-index works */
-    z-index: 10; /* Bring avatar and name to front */
-    color: #fff; /* White text for header on banner */
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Add text shadow for readability */
-}
-
-.profile-header-with-banner h1 {
-    /* Rely on inline style from profile.html for color */
-}
-
-.profile-header-with-banner .profile-avatar {
-    /* Rely on inline style from profile.html for border-color */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.25); /* Stronger shadow for avatar */
-}
-/* Added for social media feed layout */
-.profile-card-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px; /* Space between header and bio/button */
-}
-
-.profile-card-header div {
-    flex-grow: 1;
-}
-
-.profile-card h3 {
-    margin: 0 0 5px 0; /* Adjust margin for h3 inside flex */
-    color: #e24040;
-    font-size: 1.5em;
-}
-
-.profile-card p {
-    margin: 0; /* Remove bottom margin from p */
-}
-
-.profile-card a.btn {
-    margin-top: auto; /* Push button to the bottom of the card */
-}
-
-.hamburger-menu {
-    display: none; /* Hidden by default */
-    flex-direction: column;
-    justify-content: space-around;
-    width: 30px;
-    height: 25px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 1001; /* Above nav links */
-}
-
-.hamburger-menu .bar {
-    width: 100%;
-    height: 3px;
-    background-color: #fff;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-/* Base styles for mobile-nav-links to be hidden */
-.nav-right {
-    display: flex; /* Keep original flex for desktop */
-    transition: all 0.3s ease;
-}
-
-/* Existing responsive styles for container need adjustment for grid */
-@media (max-width: 768px) {
-    .container {
-        grid-template-columns: 1fr; /* Single column on small screens */
-    }
-    .profile-banner {
-        height: 150px; /* Slightly smaller banner on tablets */
-        margin-left: -15px; /* Adjust for container padding */
-        margin-right: -15px; /* Adjust for container padding */
-        width: calc(100% + 30px); /* Fill width considering padding */
-    }
-
-    .profile-header-with-banner {
-        margin-top: -75px; /* Adjust overlap for smaller banner */
-    }
-
-    .profile-avatar {
-        width: 100px;
-        height: 100px;
-        border-width: 3px;
-    }
-    
-    .hamburger-menu {
-        display: flex; /* Show hamburger menu on mobile */
-    }
-
-    .nav-right {
-        /* Hide nav links by default on mobile */
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 60px; /* Below fixed nav */
-        left: 0;
-        width: 100%;
-        background-color: #000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        padding: 15px 0;
-        z-index: 999;
-    }
-
-    .nav-right.active {
-        display: flex; /* Show when active */
-    }
-
-    .nav-right a {
-        margin: 10px 20px; /* Adjust spacing for mobile menu items */
-        text-align: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .nav-left .site-link {
-        /* Keep site-link visible, adjust size */
-        display: block; 
-        font-size: 18px;
-    }
-    .nav-left .logo {
-        height: 30px !important; /* Slightly smaller logo */
-        width: 30px !important;
-    }
-
-    .nav-right {
         /* flex-direction: column;  Already set for <768px */
-        align-items: center; /* Center links in column */
+        align-items: flex-end; /* Align links to the right */
         gap: 0; /* No gap needed, margin handles it */
     }
     
@@ -738,21 +534,4 @@ ul li::before {
     .profile-header h1 {
         font-size: 1.8em; /* Ensure profile name is still prominent */
     }
-    .profile-banner {
-        height: 120px; /* Even smaller banner on phones */
-        margin-left: -15px; /* Adjust for container padding */
-        margin-right: -15px; /* Adjust for container padding */
-        width: calc(100% + 30px); /* Fill width considering padding */
-    }
-
-    .profile-header-with-banner {
-        margin-top: -60px; /* Adjust overlap for even smaller banner */
-    }
-
-    .profile-avatar {
-        width: 80px;
-        height: 80px;
-        border-width: 2px;
-    }
-}
-
+}"""

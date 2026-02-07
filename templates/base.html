@@ -5,6 +5,7 @@
     <meta name="description" content="Mingleoo.com é a sua rede social para fazer amigos, conhecer pessoas novas e se conectar com perfis que combinam com você. Encontre sua comunidade hoje!">
     <title>{% block title %}Mingleoo.com{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/1.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -21,9 +22,10 @@
         </div>
         <div class="nav-right" id="mobile-nav-links">
             {% if logged_in_user %}
-                <a href="{{ url_for('list_conversations') }}">Mensagens ({% if unread_message_count > 0 %}<span style="color: yellow;">{{ unread_message_count }}</span>{% else %}0{% endif %})</a>
-                <a href="{{ url_for('notifications') }}">Notificações ({% if notification_count > 0 %}<span style="color: yellow;">{{ notification_count }}</span>{% else %}0{% endif %})</a>
-                <a href="{{ url_for('edit_profile') }}">Perfil</a>
+                <a href="{{ url_for('list_conversations') }}" title="Mensagens"><i class="fa-solid fa-message"></i>{% if unread_message_count > 0 %}<span style="color: yellow;"> {{ unread_message_count }}</span>{% endif %}</a>
+                <a href="{{ url_for('notifications') }}" title="Notificações"><i class="fa-solid fa-bell"></i>{% if notification_count > 0 %}<span style="color: yellow;"> {{ notification_count }}</span>{% endif %}</a>
+                <a href="{{ url_for('view_profile', user_id=logged_in_user.id) }}" title="Ver Meu Perfil"><i class="fa-solid fa-user"></i></a>
+                <a href="{{ url_for('edit_profile') }}" title="Editar Perfil"><i class="fa-solid fa-gear"></i></a>
             {% else %}
                 <a href="/register">Conecte-se</a>
             {% endif %}
@@ -36,7 +38,7 @@
     </nav>
 
 <div class="beta-warning">
-    🚧 BETA 0.17. Bugs podem acontecer!
+    🚧 BETA 0.18. Bugs podem acontecer!
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}

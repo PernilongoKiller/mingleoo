@@ -201,16 +201,15 @@ def inject_global_data():
 
 @app.route("/")
 def index():
-    # Temporarily comment out for debugging performance
-    # if current_user():
-    #     return redirect(url_for("dashboard"))
-    # users = User.query.all()
-    # return render_template(
-    #     "index.html",
-    #     users=users,
-    #     total_users=len(users)
-    # )
-    return "<h1>Debugging: Index page is temporarily simplified.</h1>" # Simple response for testing
+    # Test current_user() redirect
+    if current_user(): # This involves a DB query
+        return redirect(url_for("dashboard"))
+    # users = User.query.all() # Keep this commented out for now
+    return render_template(
+        "index.html",
+        # users=users, # Keep this commented out for now
+        # total_users=len(users) # Keep this commented out for now
+    )
 
 
 @app.route("/search")

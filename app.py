@@ -52,6 +52,8 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+PER_PAGE = 20 # Number of users to display per page
+
 COUNTRIES = sorted([
     "Brasil", "Estados Unidos", "Canadá", "México", "Argentina", "Chile", "Colômbia", "Portugal", "Espanha", "França",
     "Alemanha", "Itália", "Reino Unido", "Irlanda", "Suíça", "Bélgica", "Holanda", "Suécia", "Noruega", "Dinamarca",
@@ -201,14 +203,20 @@ def inject_global_data():
 
 @app.route("/")
 def index():
-    # Test current_user() redirect
-    if current_user(): # This involves a DB query
+    page = request.args.get('page', 1, type=int) # Get page number from URL, default to 1
+    if current_user():
         return redirect(url_for("dashboard"))
-    # users = User.query.all() # Keep this commented out for now
+    
+    # Fetch paginated users, ordered by creation date
+    pagination = User.query.join(Account).order_by(Account.created_at.desc()).paginate(
+        page=page, per_page=PER_PAGE, error_out=False
+    )
+    
     return render_template(
         "index.html",
-        # users=users, # Keep this commented out for now
-        # total_users=len(users) # Keep this commented out for now
+        pagination=pagination,
+        users=pagination.items, # Pass items for current page
+        total_users=pagination.total # Total count of users
     )
 
 

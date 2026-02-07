@@ -30,9 +30,9 @@
         </p>
 
         <h2>Perfis</h2>
-        <p>Encontre alguém entre: {{ users|length }} usuários!</p>
+        <p>Encontre alguém entre: {{ total_users }} usuários!</p>
 
-        {% for user in users %}
+        {% for user in pagination.items %}
         <div class="profile-card">
             <div class="profile-card-header">
                 <img src="{{ user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ user.name }}" class="dashboard-avatar">
@@ -49,5 +49,11 @@
             {% endif %}
         </div>
         {% endfor %}
+
+        {% if pagination.has_next %}
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('index', page=pagination.next_num) }}" class="btn">Mostrar Mais Usuários</a>
+        </div>
+        {% endif %}
     </div>
 {% endblock %}

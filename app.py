@@ -40,6 +40,7 @@ app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in (
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['MAIL_TIMEOUT'] = int(os.environ.get('MAIL_TIMEOUT', 60)) # Set email sending timeout to 60 seconds
 
 # Uploads Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -397,14 +398,25 @@ def register():
         db_session.add(new_account)
         db_session.commit()
 
-        token = s.dumps(email, salt='email-confirm')
+        # Check for essential mail configurations
+        if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD') or not app.config.get('MAIL_DEFAULT_SENDER'):
+            flash('Erro de configuração de e-mail: credenciais de envio não definidas. Por favor, contate o administrador.', 'error')
+            # Optionally, you might want to delete the account or mark it for manual confirmation if email can't be sent.
+            # For now, we proceed, but the user won't get an email.
+            return redirect(url_for("login"))
 
-        msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[email])
-        link = url_for('confirm_email', token=token, _external=True)
-        msg.body = 'Seu link de confirmação é {}'.format(link)
-        mail.send(msg)
-
-        flash('Um e-mail de confirmação foi enviado para o seu e-mail.', 'success')
+        try:
+            token = s.dumps(email, salt='email-confirm')
+            msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[email])
+            link = url_for('confirm_email', token=token, _external=True)
+            msg.body = f'Olá {username},\n\nObrigado por se registrar no Mingleoo! Por favor, confirme seu endereço de e-mail clicando no link abaixo:\n\n{link}\n\nSe você não se registrou no Mingleoo, por favor ignore este e-mail.\n\nAtenciosamente,\nA Equipe Mingleoo'
+            mail.send(msg)
+            flash('Um e-mail de confirmação foi enviado para o seu e-mail.', 'success')
+        except Exception as e:
+            flash(f'Erro ao enviar e-mail de confirmação: {e}. Por favor, tente novamente ou contate o administrador.', 'error')
+            # Log the error for debugging purposes
+            app.logger.error(f"Failed to send confirmation email to {email}: {e}")
+        
         return redirect(url_for("login"))
 
     return render_template("register.html", form=form)

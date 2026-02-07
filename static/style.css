@@ -116,8 +116,7 @@ nav {
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Stronger shadow */
 }
 
 .profile-container {
@@ -144,7 +143,6 @@ nav {
 }
 
 .profile-card:hover {
-    transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
@@ -230,7 +228,6 @@ a:hover {
 
 .btn:hover, .btn-99:hover {
     background-color: #b82828;
-    transform: translateY(-2px);
     box-shadow: 0 5px 12px rgba(0,0,0,0.15);
 }
 
@@ -260,7 +257,6 @@ a:hover {
 
 .btn-mingle:hover {
     background: linear-gradient(to bottom, #e24040, #b82828);
-    transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 

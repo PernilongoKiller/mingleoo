@@ -52,6 +52,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+COUNTRIES = [
+    "Brasil", "Estados Unidos", "Canadá", "México", "Argentina", "Chile", "Colômbia", "Portugal", "Espanha", "França",
+    "Alemanha", "Itália", "Reino Unido", "Irlanda", "Suíça", "Bélgica", "Holanda", "Suécia", "Noruega", "Dinamarca",
+    "Rússia", "China", "Índia", "Japão", "Coreia do Sul", "Austrália", "Nova Zelândia", "África do Sul", "Egito", "Nigéria"
+]
+
 from werkzeug.utils import secure_filename
 
 
@@ -628,7 +634,8 @@ def edit_profile():
         db_session.commit()
         return redirect(url_for("view_profile", user_id=user.id))
 
-    user_dict = {'name': user.name, 'bio': user.bio, 'avatar_url': user.avatar_url, 'banner_url': user.banner_url, 'profile_color': user.profile_color, 'background_color': user.background_color}
+    user_dict = {'name': user.name, 'bio': user.bio, 'avatar_url': user.avatar_url, 'banner_url': user.banner_url, 'profile_color': user.profile_color, 'background_color': user.background_color,
+                 'age': user.age, 'nationality': user.nationality, 'gender': user.gender, 'sexuality': user.sexuality}
     user_tags_list = [tag.name for tag in user.tags]
     user_links_list = [{'platform': l.platform, 'url': l.url} for l in user.links]
     user_sections_list = [{'title': s.title, 'content': s.content} for s in user.sections]
@@ -638,8 +645,8 @@ def edit_profile():
         user=user_dict,
         user_tags=user_tags_list,
         user_links=user_links_list,
-        user_sections=user_sections_list
+        user_sections=user_sections_list,
+        countries=COUNTRIES # Pass the list of countries to the template
     )
-
 if __name__ == "__main__":
     app.run(debug=True)

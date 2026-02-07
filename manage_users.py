@@ -19,7 +19,7 @@ def send_confirmation_email_to_all_unconfirmed_users():
             mail.send(msg)
             print(f"Sent confirmation email to {account.email}")
 
-def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=False, target_username=None, target_email=None, delete=False):
+def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=False, target_username=None, target_email=None, delete=False, force=False):
     """
     Finds and optionally deletes bot accounts based on a set of criteria.
 
@@ -30,6 +30,7 @@ def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=
     :param target_username: Specific username to filter by.
     :param target_email: Specific email to filter by.
     :param delete: Whether to delete the accounts found.
+    :param force: Whether to bypass confirmation for deletion.
     """
     query = Account.query.join(User)
 
@@ -57,8 +58,12 @@ def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=
         print(f"  - Username: {bot.username}, Email: {bot.email}, Created: {bot.created_at}, Confirmed: {bot.confirmed}")
 
     if delete:
-        confirm = input(f"Are you sure you want to delete {len(bots)} accounts? Type 'yes' to confirm: ")
-        if confirm.strip().lower() == 'yes':
+        if force:
+            confirm_input = 'yes'
+        else:
+            confirm_input = input(f"Are you sure you want to delete {len(bots)} accounts? Type 'yes' to confirm: ")
+        
+        if confirm_input.strip().lower() == 'yes':
             print("\nDeleting accounts...")
             for bot in bots:
                 db_session.delete(bot)
@@ -85,6 +90,7 @@ if __name__ == '__main__':
     parser_bots.add_argument('--target-username', type=str, help='Specify a username to target.')
     parser_bots.add_argument('--target-email', type=str, help='Specify an email to target.')
     parser_bots.add_argument('--delete', action='store_true', help='Delete the accounts found.')
+    parser_bots.add_argument('--force', action='store_true', help='Bypass confirmation for deletion.')
 
     args = parser.parse_args()
 
@@ -102,7 +108,8 @@ if __name__ == '__main__':
             no_avatar=args.no_avatar,
             target_username=args.target_username,
             target_email=args.target_email,
-            delete=args.delete
+            delete=args.delete,
+            force=args.force
         )
     else:
         parser.print_help()

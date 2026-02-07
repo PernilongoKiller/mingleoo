@@ -52,11 +52,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-COUNTRIES = [
+COUNTRIES = sorted([
     "Brasil", "Estados Unidos", "Canadá", "México", "Argentina", "Chile", "Colômbia", "Portugal", "Espanha", "França",
     "Alemanha", "Itália", "Reino Unido", "Irlanda", "Suíça", "Bélgica", "Holanda", "Suécia", "Noruega", "Dinamarca",
     "Rússia", "China", "Índia", "Japão", "Coreia do Sul", "Austrália", "Nova Zelândia", "África do Sul", "Egito", "Nigéria"
-]
+])
 
 from werkzeug.utils import secure_filename
 
@@ -504,7 +504,11 @@ def view_profile(user_id):
         'avatar_url': viewed_user.avatar_url,
         'banner_url': viewed_user.banner_url,
         'profile_color': viewed_user.profile_color,
-        'background_color': viewed_user.background_color
+        'background_color': viewed_user.background_color,
+        'age': viewed_user.age,
+        'nationality': viewed_user.nationality,
+        'gender': viewed_user.gender,
+        'sexuality': viewed_user.sexuality
     }
     sections_list = [{'title': s.title, 'content': s.content} for s in viewed_user.sections]
     tags_list = [tag.name for tag in viewed_user.tags]

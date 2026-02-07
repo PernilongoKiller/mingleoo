@@ -42,7 +42,7 @@ body {
     font-size: 16px;
     min-height: 100vh; /* Ensure body takes full viewport height */
     position: relative; /* For beta-warning to position correctly if not fixed */
-    padding-bottom: 50px; /* Space for fixed beta-warning */
+    padding-bottom: 0px; /* Reset padding-bottom, will be adjusted by media queries for mobile */
 }
 
 .main-content {
@@ -57,7 +57,7 @@ body {
 /* ---------------------------
    Navegação
 --------------------------- */
-nav {
+.top-nav-desktop { /* Styling for the top navigation bar, primarily for desktop */
     position: fixed;
     top: 0;
     left: 0;
@@ -418,11 +418,62 @@ ul li::before {
     body {
         padding-top: 60px; /* Adjust padding for smaller nav */
         font-size: 15px;
+        padding-bottom: 70px; /* Space for bottom mobile nav */
     }
 
-    nav {
-        padding: 8px 15px;
+    /* Hide the desktop top nav on mobile */
+    .top-nav-desktop {
+        display: none;
     }
+
+    /* Mobile bottom navigation bar */
+    .bottom-nav-mobile {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #000;
+        color: #fff;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-around; /* Distribute items evenly */
+        align-items: center;
+        z-index: 1000;
+        box-shadow: 0 -3px 8px rgba(0,0,0,0.2); /* Shadow for depth */
+        border-top: 1px solid #333; /* Top border */
+        border-radius: 0; /* No rounded corners for bottom nav */
+    }
+
+    .bottom-nav-mobile a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.9em;
+        display: flex;
+        flex-direction: column; /* Stack icon and text */
+        align-items: center;
+        gap: 3px; /* Small gap between icon and text */
+        padding: 5px;
+        flex-grow: 1; /* Make links take equal space */
+    }
+
+    .bottom-nav-mobile a i {
+        font-size: 1.5em; /* Larger icons for mobile */
+    }
+    
+    .bottom-nav-mobile a span { /* For message/notification counts */
+        font-size: 0.7em;
+        font-weight: bold;
+    }
+
+    .bottom-nav-mobile a:hover {
+        color: #e24040; /* Highlight on hover/tap */
+    }
+
+    /* Hide the .nav-right on mobile when it's part of the top nav */
+    .top-nav-desktop .nav-right {
+        display: none;
+    }
+
 
     .nav-left .site-link {
         font-size: 20px;
@@ -502,37 +553,8 @@ ul li::before {
 }
 
 @media (max-width: 480px) {
-    .nav-left .site-link {
-        /* Keep site-link visible, adjust size */
-        display: block; 
-        font-size: 18px;
-    }
-    .nav-left .logo {
-        height: 30px !important; /* Slightly smaller logo */
-        width: 30px !important;
-    }
-
-    .nav-right {
-        /* flex-direction: column;  Already set for <768px */
-        align-items: flex-end; /* Align links to the right */
-        gap: 0; /* No gap needed, margin handles it */
-    }
-    
-    .nav-right a {
-        font-size: 0.9em; /* Slightly larger for touch */
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-    h2 {
-        font-size: 1.2em;
-    }
-    h3 {
-        font-size: 1em;
-    }
-
-    .profile-header h1 {
-        font-size: 1.8em; /* Ensure profile name is still prominent */
+    /* Adjust specific elements for very small screens */
+    .bottom-nav-mobile a {
+        font-size: 0.8em; /* Smaller text for very small screens */
     }
 }

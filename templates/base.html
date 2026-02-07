@@ -15,12 +15,12 @@
 </head>
 <body {% block body_attrs %}{% endblock %}>
 
-    <nav>
+    <nav class="top-nav-desktop"> <!-- Added class for desktop specific nav -->
         <div class="nav-left">
             <img src="{{ url_for('static', filename='images/2.png') }}" alt="Logo" class="logo">
             <a href="{{ url_for('index') }}" class="site-link">mingleoo.com</a>
         </div>
-        <div class="nav-right" id="mobile-nav-links">
+        <div class="nav-right"> <!-- Removed id="mobile-nav-links" as it's not needed for desktop -->
             {% if logged_in_user %}
                 <a href="{{ url_for('list_conversations') }}" title="Mensagens"><i class="fa-solid fa-message"></i>{% if unread_message_count > 0 %}<span style="color: yellow;"> {{ unread_message_count }}</span>{% endif %}</a>
                 <a href="{{ url_for('notifications') }}" title="Notificações"><i class="fa-solid fa-bell"></i>{% if notification_count > 0 %}<span style="color: yellow;"> {{ notification_count }}</span>{% endif %}</a>
@@ -30,15 +30,11 @@
                 <a href="/register">Conecte-se</a>
             {% endif %}
         </div>
-        <button class="hamburger-menu" id="hamburger-menu">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
-        </button>
+        <!-- Removed hamburger menu button -->
     </nav>
 
 <div class="beta-warning">
-    🚧 BETA 0.19. Bugs podem acontecer!
+    🚧 BETA 0.20. Bugs podem acontecer!
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -59,14 +55,17 @@
         <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
     </footer>
 
-    <script>
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const mobileNavLinks = document.getElementById('mobile-nav-links');
+    <!-- New mobile bottom navigation bar -->
+    {% if logged_in_user %}
+    <nav class="bottom-nav-mobile">
+        <a href="{{ url_for('dashboard') }}" title="Home"><i class="fa-solid fa-house"></i></a>
+        <a href="{{ url_for('list_conversations') }}" title="Mensagens"><i class="fa-solid fa-message"></i>{% if unread_message_count > 0 %}<span style="color: yellow;"> {{ unread_message_count }}</span>{% endif %}</a>
+        <a href="{{ url_for('notifications') }}" title="Notificações"><i class="fa-solid fa-bell"></i>{% if notification_count > 0 %}<span style="color: yellow;"> {{ notification_count }}</span>{% endif %}</a>
+        <a href="{{ url_for('view_profile', user_id=logged_in_user.id) }}" title="Ver Meu Perfil"><i class="fa-solid fa-user"></i></a>
+        <a href="{{ url_for('edit_profile') }}" title="Editar Perfil"><i class="fa-solid fa-gear"></i></a>
+    </nav>
+    {% endif %}
 
-        hamburgerMenu.addEventListener('click', () => {
-            mobileNavLinks.classList.toggle('active');
-        });
-    </script>
-
+    <!-- Removed hamburger menu JS -->
 </body>
 </html>

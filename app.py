@@ -64,8 +64,263 @@ PER_PAGE = 20 # Number of users to display per page
 COUNTRIES = sorted([
     "Brasil", "Estados Unidos", "Canadá", "México", "Argentina", "Chile", "Colômbia", "Portugal", "Espanha", "França",
     "Alemanha", "Itália", "Reino Unido", "Irlanda", "Suíça", "Bélgica", "Holanda", "Suécia", "Noruega", "Dinamarca",
-    "Rússia", "China", "Índia", "Japão", "Coreia do Sul", "Austrália", "Nova Zelândia", "África do Sul", "Egito", "Nigéria"
+    "Rússia", "China", "Índia", "Japão", "Coreia do Sul", "Austrália", "Nova Zelândia", "África do Sul", "Egito", "Nigéria",
+    "Tailândia", "Vietnã", "Indonésia", "Malásia", "Filipinas", "Turquia", "Grécia", "Polônia", "Ucrânia", "Romênia",
+    "Hungria", "República Tcheca", "Áustria", "Irlanda", "Finlândia", "Singapura", "Hong Kong", "Emirados Árabes Unidos",
+    "Arábia Saudita", "Israel", "Catar", "Kuwait", "Bahrein", "Omã", "México", "Peru", "Equador", "Bolívia", "Paraguai",
+    "Uruguai", "Venezuela", "Cuba", "Jamaica", "República Dominicana", "Porto Rico", "Colômbia", "Panamá", "Costa Rica",
+    "Guatemala", "Honduras", "El Salvador", "Nicarágua", "Canadá", "Noruega", "Suécia", "Dinamarca", "Finlândia",
+    "Islândia", "Estônia", "Letônia", "Lituânia", "Bielorrússia", "Moldávia", "Geórgia", "Armênia", "Azerbaijão",
+    "Cazaquistão", "Uzbequistão", "Turcomenistão", "Quirguistão", "Tajiquistão", "Afeganistão", "Paquistão", "Bangladesh",
+    "Sri Lanka", "Nepal", "Butão", "Maldivas", "Mianmar", "Laos", "Camboja", "Timor-Leste", "Coreia do Norte", "Fiji",
+    "Papua Nova Guiné", "Ilhas Salomão", "Vanuatu", "Nova Caledônia", "Samoa", "Tonga", "Tuvalu", "Quiribati", "Nauru",
+    "Palau", "Micronésia", "Ilhas Marshall", "Ilhas Cook", "Niue", "Togo", "Benim", "Gana", "Costa do Marfim", "Libéria",
+    "Serra Leoa", "Guiné", "Guiné-Bissau", "Gâmbia", "Senegal", "Mauritânia", "Mali", "Burkina Faso", "Níger", "Chade",
+    "Sudão", "Sudão do Sul", "Eritreia", "Djibuti", "Etiópia", "Somália", "Quênia", "Uganda", "Ruanda", "Burundi",
+    "Tanzânia", "Comores", "Seicheles", "Madagascar", "Maurício", "Malauí", "Moçambique", "Zâmbia", "Zimbábue", "Botsuana",
+    "Namíbia", "Angola", "Congo (Brazzaville)", "Congo (Kinshasa)", "Gabão", "Guiné Equatorial", "Camarões",
+    "República Centro-Africana", "São Tomé e Príncipe", "Cabo Verde", "Argélia", "Tunísia", "Marrocos", "Líbia", "Egito",
+    "Sérvia", "Croácia", "Bósnia e Herzegovina", "Montenegro", "Albânia", "Macedônia do Norte", "Bulgária", "Chipre",
+    "Malta", "Luxemburgo", "Eslovênia", "Eslováquia", "Lichtenstein", "Andorra", "Mônaco", "San Marino", "Vaticano",
+    "Liechtenstein", "São Marino", "Liechtenstein", "Montserrat", "Guiana Francesa", "Reunião", "Martinica", "Guadalupe",
+    "Polinésia Francesa", "Nova Caledônia", "Wallis e Futuna", "Mayotte", "São Pedro e Miquelão", "Terras Austrais e Antárticas Francesas",
+    "Ilhas Faroé", "Groenlândia", "Svalbard e Jan Mayen", "Gibraltar", "Ilha de Man", "Jersey", "Guernsey", "Aland",
+    "Curaçao", "Aruba", "São Martinho (Países Baixos)", "Bonaire, Santo Eustáquio e Saba", "Anguila", "Bermudas",
+    "Ilhas Virgens Britânicas", "Ilhas Cayman", "Ilhas Malvinas", "Turks e Caicos", "Santa Helena, Ascensão e Tristão da Cunha",
+    "Geórgia do Sul e Ilhas Sandwich do Sul", "Território Britânico do Oceano Índico", "Pitcairn", "Ilhas Virgens Americanas",
+    "Samoa Americana", "Guam", "Marianas Setentrionais", "Estados Federados da Micronésia", "Ilhas Marshall", "Palau",
+    "Porto Rico", "Wake Island", "Midway Atoll", "Johnston Atoll", "Kingman Reef", "Palmyra Atoll", "Jarvis Island",
+    "Baker Island", "Howland Island", "Ilha Navassa", "Niue", "Tokelau", "Ilhas Cook", "Tonga", "Samoa", "Tuvalu",
+    "Quiribati", "Nauru", "Wallis e Futuna", "Kiribati", "Vanuatu", "Ilhas Salomão", "Timor-Leste", "Papua Nova Guiné",
+    "Fiji", "Vanuatu", "Nauru", "Camboja", "Laos", "Mianmar", "Filipinas", "Indonésia", "Malásia", "Singapura", "Tailândia",
+    "Vietnã", "Brunei", "Líbano", "Jordânia", "Síria", "Iraque", "Irã", "Chipre", "Geórgia", "Armênia", "Azerbaijão",
+    "Cazaquistão", "Uzbequistão", "Turcomenistão", "Quirguistão", "Tajiquistão", "Mongólia", "Coreia do Norte", "Coreia do Sul",
+    "Japão", "Hong Kong", "Macau", "Taiwan", "China", "Índia", "Paquistão", "Bangladesh", "Sri Lanka", "Nepal", "Butão",
+    "Maldivas", "Afeganistão", "Turquia", "Grécia", "Bulgária", "Romênia", "Sérvia", "Croácia", "Bósnia e Herzegovina",
+    "Montenegro", "Albânia", "Macedônia do Norte", "Kosovo", "Hungria", "Eslováquia", "República Tcheca", "Polônia",
+    "Lituânia", "Letônia", "Estônia", "Finlândia", "Suécia", "Noruega", "Islândia", "Dinamarca", "Irlanda", "Reino Unido",
+    "Países Baixos", "Bélgica", "Luxemburgo", "França", "Alemanha", "Suíça", "Áustria", "Itália", "Espanha", "Portugal",
+    "Andorra", "Mônaco", "San Marino", "Vaticano", "Malta", "Chipre", "Gibraltar", "Ilha de Man", "Jersey", "Guernsey"
 ])
+
+
+# Mapping of country names to their ISO 3166-1 alpha-2 codes
+# This list is not exhaustive and focuses on countries in the `COUNTRIES` list and common ones.
+COUNTRY_CODE_MAP = {
+    "Brasil": "BR",
+    "Estados Unidos": "US",
+    "Canadá": "CA",
+    "México": "MX",
+    "Argentina": "AR",
+    "Chile": "CL",
+    "Colômbia": "CO",
+    "Portugal": "PT",
+    "Espanha": "ES",
+    "França": "FR",
+    "Alemanha": "DE",
+    "Itália": "IT",
+    "Reino Unido": "GB",
+    "Irlanda": "IE",
+    "Suíça": "CH",
+    "Bélgica": "BE",
+    "Holanda": "NL", # Netherlands
+    "Suécia": "SE",
+    "Noruega": "NO",
+    "Dinamarca": "DK",
+    "Rússia": "RU",
+    "China": "CN",
+    "Índia": "IN",
+    "Japão": "JP",
+    "Coreia do Sul": "KR",
+    "Austrália": "AU",
+    "Nova Zelândia": "NZ",
+    "África do Sul": "ZA",
+    "Egito": "EG",
+    "Nigéria": "NG",
+    "Polônia": "PL",
+    "Ucrânia": "UA",
+    "Turquia": "TR",
+    "Grécia": "GR",
+    "Tailândia": "TH",
+    "Vietnã": "VN",
+    "Indonésia": "ID",
+    "Malásia": "MY",
+    "Filipinas": "PH",
+    "Cuba": "CU",
+    "Peru": "PE",
+    "Emirados Árabes Unidos": "AE",
+    "Arábia Saudita": "SA",
+    "Israel": "IL",
+    "Catar": "QA",
+    "Kuwait": "KW",
+    "Hong Kong": "HK",
+    "Singapura": "SG",
+    "Finlândia": "FI",
+    "Islândia": "IS",
+    "Sérvia": "RS",
+    "Croácia": "HR",
+    "Bósnia e Herzegovina": "BA",
+    "Hungria": "HU",
+    "República Tcheca": "CZ",
+    "Áustria": "AT",
+    "Luxemburgo": "LU",
+    "Malta": "MT",
+    "Chipre": "CY",
+    "Romênia": "RO",
+    "Bulgária": "BG",
+    "Eslováquia": "SK",
+    "Eslovênia": "SI",
+    "Lituânia": "LT",
+    "Letônia": "LV",
+    "Estônia": "EE",
+    "Bielorrússia": "BY",
+    "Moldávia": "MD",
+    "Geórgia": "GE",
+    "Armênia": "AM",
+    "Azerbaijão": "AZ",
+    "Cazaquistão": "KZ",
+    "Uzbequistão": "UZ",
+    "Turcomenistão": "TM",
+    "Quirguistão": "KG",
+    "Tajiquistão": "TJ",
+    "Afeganistão": "AF",
+    "Paquistão": "PK",
+    "Bangladesh": "BD",
+    "Sri Lanka": "LK",
+    "Nepal": "NP",
+    "Butão": "BT",
+    "Maldivas": "MV",
+    "Mianmar": "MM",
+    "Laos": "LA",
+    "Camboja": "KH",
+    "Timor-Leste": "TL",
+    "Coreia do Norte": "KP",
+    "Fiji": "FJ",
+    "Papua Nova Guiné": "PG",
+    "Ilhas Salomão": "SB",
+    "Vanuatu": "VU",
+    "Nova Caledônia": "NC",
+    "Samoa": "WS",
+    "Tonga": "TO",
+    "Tuvalu": "TV",
+    "Quiribati": "KI",
+    "Nauru": "NR",
+    "Palau": "PW",
+    "Micronésia": "FM",
+    "Ilhas Marshall": "MH",
+    "Ilhas Cook": "CK",
+    "Niue": "NU",
+    "Togo": "TG",
+    "Benim": "BJ",
+    "Gana": "GH",
+    "Costa do Marfim": "CI",
+    "Libéria": "LR",
+    "Serra Leoa": "SL",
+    "Guiné": "GN",
+    "Guiné-Bissau": "GW",
+    "Gâmbia": "GM",
+    "Senegal": "SN",
+    "Mauritânia": "MR",
+    "Mali": "ML",
+    "Burkina Faso": "BF",
+    "Níger": "NE",
+    "Chade": "TD",
+    "Sudão": "SD",
+    "Sudão do Sul": "SS",
+    "Eritreia": "ER",
+    "Djibuti": "DJ",
+    "Etiópia": "ET",
+    "Somália": "SO",
+    "Quênia": "KE",
+    "Uganda": "UG",
+    "Ruanda": "RW",
+    "Burundi": "BI",
+    "Tanzânia": "TZ",
+    "Comores": "KM",
+    "Seicheles": "SC",
+    "Madagascar": "MG",
+    "Maurício": "MU",
+    "Malauí": "MW",
+    "Moçambique": "MZ",
+    "Zâmbia": "ZM",
+    "Zimbábue": "ZW",
+    "Botsuana": "BW",
+    "Namíbia": "NA",
+    "Angola": "AO",
+    "Congo (Brazzaville)": "CG",
+    "Congo (Kinshasa)": "CD",
+    "Gabão": "GA",
+    "Guiné Equatorial": "GQ",
+    "Camarões": "CM",
+    "República Centro-Africana": "CF",
+    "São Tomé e Príncipe": "ST",
+    "Cabo Verde": "CV",
+    "Argélia": "DZ",
+    "Tunísia": "TN",
+    "Marrocos": "MA",
+    "Líbia": "LY",
+    "Svalbard e Jan Mayen": "SJ", # Special case, often represented as NO
+    "Gibraltar": "GI",
+    "Ilha de Man": "IM",
+    "Jersey": "JE",
+    "Guernsey": "GG",
+    "Aland": "AX",
+    "Curaçao": "CW",
+    "Aruba": "AW",
+    "São Martinho (Países Baixos)": "SX",
+    "Bonaire, Santo Eustáquio e Saba": "BQ",
+    "Anguila": "AI",
+    "Bermudas": "BM",
+    "Ilhas Virgens Britânicas": "VG",
+    "Ilhas Cayman": "KY",
+    "Ilhas Malvinas": "FK",
+    "Turks e Caicos": "TC",
+    "Santa Helena, Ascensão e Tristão da Cunha": "SH",
+    "Geórgia do Sul e Ilhas Sandwich do Sul": "GS",
+    "Território Britânico do Oceano Índico": "IO",
+    "Pitcairn": "PN",
+    "Ilhas Virgens Americanas": "VI",
+    "Samoa Americana": "AS",
+    "Guam": "GU",
+    "Marianas Setentrionais": "MP",
+    "Estados Federados da Micronésia": "FM",
+    "Wake Island": "UM", # Minor Outlying Islands, often just US
+    "Porto Rico": "PR",
+    "Montserrat": "MS",
+    "Guiana Francesa": "GF",
+    "Reunião": "RE",
+    "Martinica": "MQ",
+    "Guadalupe": "GP",
+    "Polinésia Francesa": "PF",
+    "Wallis e Futuna": "WF",
+    "Mayotte": "YT",
+    "São Pedro e Miquelão": "PM",
+    "Terras Austrais e Antárticas Francesas": "TF",
+    "Ilhas Faroé": "FO",
+    "Groenlândia": "GL",
+    "Andorra": "AD",
+    "Mônaco": "MC",
+    "San Marino": "SM",
+    "Vaticano": "VA",
+    "Liechtenstein": "LI",
+    "Kosovo": "XK" # User-assigned code, not ISO 3166-1 alpha-2, but commonly used for emojis
+}
+
+def get_emoji_flag(country_code):
+    """Converts a two-letter country code to its emoji flag."""
+    if not country_code or len(country_code) != 2:
+        return ""
+    return "".join(chr(0x1F1E6 + (ord(c) - ord('A'))) for c in country_code.upper())
+
+def country_to_emoji(country_name):
+    """
+    Converts a full country name to its emoji flag.
+    Returns an empty string if the country name is not found in the map.
+    """
+    country_code = COUNTRY_CODE_MAP.get(country_name)
+    if country_code:
+        return get_emoji_flag(country_code)
+    return ""
 
 from werkzeug.utils import secure_filename
 
@@ -159,6 +414,18 @@ class Follow(Base):
     follower = relationship('User', foreign_keys=[follower_id], backref=backref('following_associations', cascade="all, delete-orphan"))
     followed = relationship('User', foreign_keys=[followed_id], backref=backref('followed_by_associations', cascade="all, delete-orphan"))
 
+class Like(Base):
+    __tablename__ = 'likes'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False) # The user whose profile is liked
+    liker_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False) # The user who gave the like
+    timestamp = Column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (UniqueConstraint('user_id', 'liker_id', name='_user_liker_uc'),)
+
+    liked_user = relationship('User', foreign_keys=[user_id], backref=backref('likes_received', lazy='dynamic', cascade="all, delete-orphan"))
+    liking_user = relationship('User', foreign_keys=[liker_id], backref=backref('likes_given', lazy='dynamic', cascade="all, delete-orphan"))
+
 class UserMessage(Base):
     __tablename__ = 'user_messages'
     id = Column(Integer, primary_key=True)
@@ -200,12 +467,14 @@ def inject_global_data():
     if logged_in_user:
         notification_count = Follow.query.filter_by(followed_id=logged_in_user.id, is_read=False).count() # Only unread follows
         unread_message_count = UserMessage.query.filter_by(recipient_id=logged_in_user.id, is_read=False).count()
+        logged_in_user_flag_emoji = country_to_emoji(logged_in_user.nationality) if logged_in_user.nationality else ""
         return dict(
             logged_in_user=logged_in_user,
             notification_count=notification_count,
-            unread_message_count=unread_message_count
+            unread_message_count=unread_message_count,
+            logged_in_user_flag_emoji=logged_in_user_flag_emoji
         )
-    return dict(logged_in_user=None, notification_count=0, unread_message_count=0)
+    return dict(logged_in_user=None, notification_count=0, unread_message_count=0, logged_in_user_flag_emoji="")
 
 
 @app.route("/")
@@ -336,6 +605,53 @@ def unfollow_user(user_id):
         flash(f"Você desfez o Mingle com {followed.name}.", "info")
     else:
         flash("Você não fez Mingle com este usuário.", "error")
+
+    return redirect(url_for("view_profile", user_id=user_id))
+
+@app.route("/like/<int:user_id>", methods=["POST"])
+def like_user(user_id):
+    liker = current_user()
+    if not liker:
+        return redirect(url_for("login"))
+
+    if liker.id == user_id:
+        flash("Você não pode curtir seu próprio perfil.", "error")
+        return redirect(url_for("view_profile", user_id=user_id))
+
+    liked_user = User.query.get(user_id)
+    if not liked_user:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("dashboard"))
+
+    existing_like = Like.query.filter_by(user_id=liked_user.id, liker_id=liker.id).first()
+    if existing_like:
+        flash(f"Você já curtiu o perfil de {liked_user.name}.", "info")
+        return redirect(url_for("view_profile", user_id=user_id))
+
+    new_like = Like(user_id=liked_user.id, liker_id=liker.id)
+    db_session.add(new_like)
+    db_session.commit()
+    flash(f"Você curtiu o perfil de {liked_user.name}!", "success")
+    return redirect(url_for("view_profile", user_id=user_id))
+
+@app.route("/unlike/<int:user_id>", methods=["POST"])
+def unlike_user(user_id):
+    liker = current_user()
+    if not liker:
+        return redirect(url_for("login"))
+
+    liked_user = User.query.get(user_id)
+    if not liked_user:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("dashboard"))
+
+    like = Like.query.filter_by(user_id=liked_user.id, liker_id=liker.id).first()
+    if like:
+        db_session.delete(like)
+        db_session.commit()
+        flash(f"Você descurtiu o perfil de {liked_user.name}.", "info")
+    else:
+        flash("Você não curtiu este perfil.", "error")
 
     return redirect(url_for("view_profile", user_id=user_id))
 
@@ -520,11 +836,15 @@ def view_profile(user_id):
     
     logged_in_user = current_user()
     is_following = False
+    has_liked = False
     if logged_in_user:
         is_following = Follow.query.filter_by(follower_id=logged_in_user.id, followed_id=viewed_user.id).first() is not None
+        has_liked = Like.query.filter_by(user_id=viewed_user.id, liker_id=logged_in_user.id).first() is not None
         notification_count = Follow.query.filter_by(followed_id=logged_in_user.id).count()
     else:
         notification_count = 0
+
+    total_likes = viewed_user.likes_received.count()
 
     user_dict = {
         'id': viewed_user.id, 
@@ -537,7 +857,8 @@ def view_profile(user_id):
         'age': viewed_user.age,
         'nationality': viewed_user.nationality,
         'gender': viewed_user.gender,
-        'sexuality': viewed_user.sexuality
+        'sexuality': viewed_user.sexuality,
+        'flag_emoji': country_to_emoji(viewed_user.nationality) if viewed_user.nationality else ""
     }
     sections_list = [{'title': s.title, 'content': s.content} for s in viewed_user.sections]
     tags_list = [tag.name for tag in viewed_user.tags]
@@ -551,7 +872,9 @@ def view_profile(user_id):
         links=links_list,
         is_following=is_following,
         current_user_id=logged_in_user.id if logged_in_user else None,
-        notification_count=notification_count
+        notification_count=notification_count,
+        total_likes=total_likes,
+        has_liked=has_liked
     )
 
 @app.route("/profile", methods=["GET", "POST"])

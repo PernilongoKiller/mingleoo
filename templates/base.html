@@ -35,18 +35,10 @@
     </nav>
 
 <div class="beta-warning">
-    🚧 BETA 0.25. Bugs podem acontecer!
+    🚧 BETA 0.27. Bugs podem acontecer!
 </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+
 
     <div class="main-content">
         {% block content %}{% endblock %}
@@ -57,7 +49,7 @@
             <a href="{{ url_for('how_it_works') }}">Como funciona?</a> |
             <a href="{{ url_for('ai_info') }}">Mingleoo Usa IA!</a>
         </p>
-        <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
+        <p>Made with ❤️ by PKXD 🇧🇷</p>
     </footer>
 
     <!-- New mobile bottom navigation bar -->
@@ -73,5 +65,45 @@
     {% endif %}
 
     <!-- Removed hamburger menu JS -->
+
+    <div id="flash-messages-container"></div>
+
+    <script type="text/javascript">
+        // Embed Flask flashed messages into JavaScript
+        var flashedMessages = [];
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    flashedMessages.push({category: "{{ category }}", message: "{{ message | safe }}"});
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('flash-messages-container');
+
+            flashedMessages.forEach(function(flash) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('flash-message', flash.category);
+                messageElement.innerHTML = `<span>${flash.message}</span><button class="close-btn">&times;</button>`;
+                
+                // Close button functionality
+                messageElement.querySelector('.close-btn').addEventListener('click', function() {
+                    messageElement.remove();
+                });
+
+                container.appendChild(messageElement);
+
+                // Auto-dismiss after 5 seconds
+                setTimeout(function() {
+                    messageElement.style.opacity = '0';
+                    messageElement.style.transform = 'translateY(-20px)';
+                    setTimeout(function() {
+                        messageElement.remove();
+                    }, 500); // Allow time for fade-out animation
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

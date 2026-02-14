@@ -13,7 +13,7 @@
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
-<body {% block body_attrs %}{% endblock %}>
+<body {% block body_attrs %}{% endblock %} class="{% block body_class %}{% endblock %}">
 
     <nav class="top-nav-desktop"> <!-- Added class for desktop specific nav -->
         <div class="nav-left">
@@ -53,6 +53,10 @@
     </div>
 
     <footer>
+        <p>
+            <a href="{{ url_for('how_it_works') }}">Como funciona?</a> |
+            <a href="{{ url_for('ai_info') }}">Mingleoo Usa IA!</a>
+        </p>
         <p>Made with ❤️ by PKXD <img src="{{ url_for('static', filename='images/brazil_flag.svg') }}" alt="Brazil Flag" style="width: 16px; height: auto; vertical-align: middle;"></p>
     </footer>
 

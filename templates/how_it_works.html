@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Como o Mingleoo Funciona - Mingleoo.com{% endblock %}
+
+{% block content %}
+<div class="container text-content-container">
+    <h1>Como o Mingleoo Funciona</h1>
+
+    <p>Bem-vindo ao Mingleoo! Nossa plataforma foi criada para facilitar a conexão entre pessoas com interesses em comum, ajudando você a fazer novos amigos e encontrar sua comunidade.</p>
+
+    <h2>Principais Recursos:</h2>
+    
+    <h3>🚀 Crie Seu Perfil Único</h3>
+    <p>Personalize seu perfil com uma biografia, avatar e banner. Adicione tags (#interesses, #hobbies, #música) para que outros usuários possam te encontrar com base no que você gosta. Conte um pouco sobre você em seções personalizadas e compartilhe seus links de contato.</p>
+
+    <h3>🤝 Conecte-se (Mingle!)</h3>
+    <p>Encontrou um perfil interessante? Dê um "Mingle" para começar a seguir e receber atualizações. Receba notificações quando alguém te "Minglar" de volta!</p>
+
+    <h3>💬 Mensagens Privadas</h3>
+    <p>Converse diretamente com seus "Mingles" através de um sistema de mensagens privadas seguro. Inicie conversas, troque ideias e aprofunde suas amizades.</p>
+
+    <h3>✨ Dashboard Personalizado</h3>
+    <p>Ao logar, seu dashboard mostra perfis compatíveis com base nas suas tags. Quanto mais tags em comum, maiores as chances de você encontrar uma nova conexão!</p>
+
+    <h3>🔎 Pesquise por Interesses</h3>
+    <p>Use nossa função de busca para encontrar usuários por tags específicas. Quer encontrar alguém que goste de #jogos, #arte ou #viagem? É só pesquisar!</p>
+
+    <h3>🎲 Surpreenda-me!</h3>
+    <p>Se você está em busca de algo novo, clique em "Surpreenda-me!" para ser direcionado ao perfil de um usuário aleatório. Quem sabe você não encontra seu próximo melhor amigo?</p>
+
+    <p>O Mingleoo está em constante evolução. Nosso objetivo é proporcionar um ambiente seguro e divertido para você construir conexões reais. Junte-se a nós!</p>
+
+    <a href="{{ url_for('index') }}" class="back-link">⬅ Voltar ao Início</a>
+</div>
+{% endblock %}

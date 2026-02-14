@@ -32,7 +32,7 @@
         <h2>Perfis</h2>
         <p>Encontre alguém entre: {{ total_users }} usuários!</p>
 
-        {% for user in pagination.items %}
+        {% for user in users %}
         <div class="profile-card">
             <div class="profile-card-header">
                 <img src="{{ user.avatar_url or url_for('static', filename='images/1.png') }}" alt="Avatar de {{ user.name }}" class="dashboard-avatar">

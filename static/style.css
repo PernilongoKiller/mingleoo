@@ -1,95 +1,115 @@
 /* ---------------------------
-   Fonte
+   Global Resets & Variables
 --------------------------- */
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap'); /* Added Fira Code for hacker theme */
 
-body, input, textarea, button {
-    font-family: 'Lato', sans-serif;
-    color: #333; /* Cor de texto mais suave */
-}
 
-/* Base border-radius for a consistent, slightly rounded look */
 :root {
-    --default-border-radius: 8px; /* Defined consistent border radius */
+    --primary-color: #e24040;
+    --primary-dark-color: #b82828;
+    --secondary-color: #000;
+    --text-color: #333;
+    --light-text-color: #555;
+    --background-color: #f8f8f8;
+    --card-background-color: #fff;
+    --border-color: #e0e0e0;
+    --highlight-color: #ffebeb;
+    --default-border-radius: 8px;
+    --beta-warning-height: 35px;
+    --top-nav-height: 62px; /* Adjusted based on previous calculation: 15px top/bottom padding + ~32px content */
+    --bottom-nav-height: 55px; /* Adjusted for mobile bottom nav (10px top/bottom padding + ~35px content) */
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* Removed global application of border-radius to prevent issues, apply to specific elements instead */
 }
 
-/* ---------------------------
-   Reset básico
---------------------------- */
 html, body {
-    height: 100%; /* Ensure body stretches to full height */
+    height: 100%;
 }
 
-
-/* ---------------------------
-   Body
---------------------------- */
 body {
-    background-color: #f8f8f8; /* Fundo mais suave */
+    font-family: 'Lato', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
     line-height: 1.6;
-    padding-top: 105px; /* Space for beta-warning (35px) + navbar (70px) */
     display: flex;
     flex-direction: column;
     align-items: center;
     font-size: 16px;
-    min-height: 100vh; /* Ensure body takes full viewport height */
-    position: relative; /* For beta-warning to position correctly if not fixed */
-    padding-bottom: 50px; /* Space for fixed beta-warning (if still at bottom) */
+    min-height: 100vh;
+    position: relative;
+    padding-top: calc(var(--beta-warning-height) + var(--top-nav-height)); /* Space for fixed beta-warning + top nav */
+    padding-bottom: 0; /* No bottom padding on desktop */
 }
 
 .main-content {
-    flex-grow: 1; /* Allow main content to push footer to bottom */
-    width: 100%; /* Ensure it spans full width for .container */
+    flex-grow: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* ---------------------------
+   Beta Warning
+--------------------------- */
+.beta-warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: var(--primary-dark-color);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    height: var(--beta-warning-height);
+    font-size: 14px;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
 /* ---------------------------
-   Navegação
+   Desktop Top Navigation
 --------------------------- */
-.top-nav-desktop { /* Styling for the top navigation bar, primarily for desktop */
+.top-nav-desktop {
     position: fixed;
-    top: 35px; /* Below beta-warning */
+    top: var(--beta-warning-height);
     left: 0;
     width: 100%;
-    background: linear-gradient(to right, #000, #1a1a1a); /* Subtle dark gradient */
+    background: linear-gradient(to right, var(--secondary-color), #1a1a1a);
     color: #fff;
-    padding: 15px 30px; /* Mais padding na nav */
+    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-    border-bottom: 1px solid #333; /* Borda mais escura */
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2); /* Sombra mais pronunciada */
-    border-radius: 0; /* Navbars typically don't have rounded corners */
+    border-bottom: 1px solid #333;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    border-radius: 0;
 }
 
 .nav-left {
-    display: flex;       
-    align-items: center; 
-    gap: 12px;           
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .nav-left .logo {
-    height: 38px; /* Ajuste sutil no logo */
+    height: 38px;
 }
 
 .nav-left .site-link {
     color: #fff;
     text-decoration: none;
     font-weight: bold;
-    font-family: 'MuseoModerno', sans-serif; 
-    font-size: 26px; /* Aumento do tamanho do logo */
+    font-family: 'MuseoModerno', sans-serif;
+    font-size: 26px;
     letter-spacing: 1px;
     transition: opacity 0.3s ease;
 }
@@ -99,92 +119,115 @@ body {
 }
 
 .nav-right {
-    display: flex; /* Make nav-right a flex container */
-    align-items: center; /* Vertically center items */
-    justify-content: flex-end; /* Push content to the right end */
-    gap: 20px; /* Consistent gap between nav items */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
     transition: all 0.3s ease;
-    flex-grow: 1; /* Make it take up all available space */
+    flex-grow: 1;
 }
 
 .nav-right a {
     color: #fff;
-    /* margin-left: 20px; -- Removed as gap on parent handles spacing */
     text-decoration: none;
     font-weight: bold;
     font-size: 1.05em;
     transition: color 0.3s ease;
-    display: inline-flex; /* Align icon and text vertically */
+    display: inline-flex;
     align-items: center;
-    gap: 5px; /* Space between icon and text */
+    gap: 5px;
 }
 
 .nav-right a:hover {
-    color: #e24040; /* Destaca ao passar o mouse */
+    color: var(--primary-color);
     text-decoration: none;
 }
 
+/* ---------------------------
+   Mobile Bottom Navigation (Hidden by default on desktop)
+--------------------------- */
+.bottom-nav-mobile {
+    display: none !important; /* Hidden on desktop, forced */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--secondary-color);
+    color: #fff;
+    padding: 10px 0;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -3px 8px rgba(0,0,0,0.2);
+    border-top: 1px solid #333;
+    border-radius: 0;
+}
 
 /* ---------------------------
    Container principal
 --------------------------- */
 .container {
     width: 90%;
-    max-width: 860px; /* Aumento do max-width */
-    margin: 30px auto; /* Centraliza o container */
+    max-width: 860px;
+    margin: 30px auto;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Colunas responsivas */
-    gap: 25px; /* Espaço entre os cards */
-    padding: 0 15px; /* Padding para as laterais em telas maiores */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 0 15px;
+}
+
+/* Styles for text-heavy pages to override default grid container */
+.text-content-container {
+    display: block; /* Force stacking of content */
 }
 
 /* ---------------------------
    Cards e Seções
 --------------------------- */
 .card {
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
-    padding: 25px; /* Mais padding */
-    margin-bottom: 25px; /* Mais margem inferior */
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Sombra mais destacada */
-    transition: box-shadow 0.2s ease; /* Removed transform */
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--default-border-radius);
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease;
 }
 
 .card:hover {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Sombra mais pronunciada no hover */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .profile-container {
     width: 90%;
     max-width: 900px;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--default-border-radius);
     padding: 30px 40px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Stronger shadow */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     margin-bottom: 50px;
 }
 
 .profile-card {
-    border: 1px solid #e0e0e0;
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
+    border: 1px solid var(--border-color);
+    border-radius: var(--default-border-radius);
     padding: 25px;
-    background-color: #fff;
-    height: 100%; /* Make card fill grid area */
+    background-color: var(--card-background-color);
+    height: 100%;
     display: flex;
-    flex-direction: column; /* Stack content vertically */
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Stronger shadow */
-    transition: box-shadow 0.2s ease; /* Removed transform */
+    flex-direction: column;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease;
 }
 
 .profile-card:hover {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Stronger shadow on hover */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .profile-card h3 {
     margin: 0 0 12px 0;
-    color: #e24040;
+    color: var(--primary-color);
     font-size: 1.5em;
 }
 
@@ -197,11 +240,11 @@ body {
 }
 
 .section {
-    border: 1px solid #ffebeb; /* Cor mais suave */
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
-    padding: 18px; /* Mais padding */
+    border: 1px solid var(--highlight-color);
+    border-radius: var(--default-border-radius);
+    padding: 18px;
     margin-bottom: 18px;
-    background-color: #ffebeb;
+    background-color: var(--highlight-color);
 }
 
 /* ---------------------------
@@ -210,18 +253,18 @@ body {
 .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* Mais espaço entre tags */
+    gap: 10px;
     margin-bottom: 25px;
 }
 
 .tags span {
-    background-color: #e24040;
+    background-color: var(--primary-color);
     color: #fff;
-    padding: 8px 16px; /* Aumento do padding */
-    border-radius: var(--default-border-radius); /* Usar border-radius consistente */
+    padding: 8px 16px;
+    border-radius: var(--default-border-radius);
     font-size: 0.95em;
     font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Sombra sutil para profundidade */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .contact-links ul {
@@ -234,13 +277,13 @@ body {
 }
 
 .contact-links a {
-    color: #e24040;
+    color: var(--primary-color);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #b82828;
+    color: var(--primary-dark-color);
     text-decoration: underline;
 }
 
@@ -248,11 +291,11 @@ a:hover {
    Botões
 --------------------------- */
 .btn, .btn-99 {
-    background-color: #e24040;
+    background-color: var(--primary-color);
     color: #fff;
     border: none;
-    padding: 12px 22px; /* Mais padding */
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
+    padding: 12px 22px;
+    border-radius: var(--default-border-radius);
     cursor: pointer;
     font-weight: bold;
     text-align: center;
@@ -261,11 +304,11 @@ a:hover {
     transition: background-color 0.3s ease, box-shadow 0.2s ease;
     font-size: 1.05em;
     box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    text-shadow: 0 1px 1px rgba(0,0,0,0.2); /* Subtle text shadow for pop */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .btn:hover, .btn-99:hover {
-    background-color: #b82828;
+    background-color: var(--primary-dark-color);
     box-shadow: 0 5px 12px rgba(0,0,0,0.15);
 }
 
@@ -280,23 +323,23 @@ a:hover {
 
 .btn-mingle {
     display: inline-block;
-    padding: 14px 28px; /* Mais padding */
+    padding: 14px 28px;
     font-size: 1.1em;
     color: #fff;
-    background: linear-gradient(to bottom, #ff5e5e, #e24040);
+    background: linear-gradient(to bottom, #ff5e5e, var(--primary-color));
     border: none;
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
+    border-radius: var(--default-border-radius);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
     margin-top: 20px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     font-weight: bold;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.2); /* Subtle text shadow for pop */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .btn-mingle:hover {
-    background: linear-gradient(to bottom, #e24040, #b82828);
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark-color));
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
@@ -308,16 +351,16 @@ input[type="text"], textarea, input[type="password"], select, input[type="number
     padding: 12px;
     margin: 8px 0;
     border: 1px solid #ccc;
-    border-radius: var(--default-border-radius); /* Use consistent border-radius */
+    border-radius: var(--default-border-radius);
     font-family: 'Lato', sans-serif;
     font-size: 1em;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    background-color: #fefefe; /* Slightly off-white for inputs */
+    background-color: #fefefe;
 }
 
-input[type="text"]:focus, textarea:focus, input[type="password']:focus, select:focus, input[type="number']:focus {
-    border-color: #a0a0a0; /* Mais escuro para foco */
-    box-shadow: 0 0 0 4px rgba(160, 160, 160, 0.25); /* Sombra mais neutra e proeminente */
+input[type="text"]:focus, textarea:focus, input[type="password']:focus, select:focus, input[type="number"]:focus {
+    border-color: #a0a0a0;
+    box-shadow: 0 0 0 4px rgba(160, 160, 160, 0.25);
     outline: none;
 }
 
@@ -325,20 +368,20 @@ input[type="text"]:focus, textarea:focus, input[type="password']:focus, select:f
    Links
 --------------------------- */
 a {
-    color: #e24040;
+    color: var(--primary-color);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #b82828;
+    color: var(--primary-dark-color);
     text-decoration: underline;
 }
 
 .back-link {
     display: block;
-    margin-top: 40px; /* Mais margem */
-    color: #e24040;
+    margin-top: 40px;
+    color: var(--primary-color);
     font-weight: bold;
     text-decoration: none;
     font-size: 1.1em;
@@ -346,29 +389,22 @@ a:hover {
 }
 
 .back-link:hover {
-    color: #b82828;
+    color: var(--primary-dark-color);
     text-decoration: underline;
 }
 
 /* ---------------------------
    Títulos e Parágrafos
 --------------------------- */
-h1, h2, h3 {
-    color: #b82828; /* Vermelho mais escuro para títulos */
-    margin-bottom: 20px;
-    text-align: left;
-    line-height: 1.2;
-}
-
-h1 { font-size: 2.5em; font-weight: 700;} /* Título maior e mais pesado */
-h2 { font-size: 2em; font-weight: 700;}
-h3 { font-size: 1.6em; font-weight: 700;}
+h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 1.5em;}
+h2 { font-size: 2em; font-weight: 700; margin-bottom: 1.2em; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.3em;}
+h3 { font-size: 1.6em; font-weight: 700; margin-bottom: 1em; }
 
 
 p {
-    margin-bottom: 18px; /* Mais margem */
-    line-height: 1.7; /* Mais espaço entre linhas para leitura */
-    color: #555;
+    margin-bottom: 1em; /* Adjusted for better text flow */
+    line-height: 1.7;
+    color: var(--light-text-color);
 }
 
 /* ---------------------------
@@ -377,104 +413,45 @@ p {
 ul {
     list-style: none;
     padding-left: 0;
+    margin-bottom: 1em; /* Adjusted for better text flow */
 }
 
 ul li {
-    margin-bottom: 10px;
+    margin-bottom: 0.5em; /* Adjusted for better text flow */
     color: #444;
     position: relative;
-    padding-left: 25px; /* Mais espaço para o marcador */
+    padding-left: 25px;
 }
 
 ul li::before {
     content: '•';
-    color: #e24040;
+    color: var(--primary-color);
     font-weight: bold;
-    font-size: 1.2em; /* Marcador maior */
+    font-size: 1.2em;
     position: absolute;
     left: 0;
     top: 0;
 }
 
 
-.beta-warning {
-    position: fixed !important;
-    top: 0 !important; /* Fixed at the very top */
-    left: 0 !important;
-    right: 0 !important;
-    width: 100%;
-    background: #b82828;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    height: 35px; /* Fixed height for beta warning */
-    font-size: 14px;
-    z-index: 1001 !important; /* Above top nav (1000) */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
 /* ---------------------------
-   Responsividade para Celular
+   Responsiveness
 --------------------------- */
 @media (max-width: 768px) {
     body {
-        padding-top: calc(60px + 35px); /* Space for top nav (60px) + beta warning (35px) on mobile */
-        font-size: 15px;
-        padding-bottom: 70px; /* Space for bottom mobile nav */
+        padding-top: var(--beta-warning-height); /* Only space for beta-warning on mobile */
+        padding-bottom: var(--bottom-nav-height); /* Space for mobile bottom nav */
     }
 
-    /* Hide the desktop top nav on mobile */
+    /* Hide desktop top nav on mobile */
     .top-nav-desktop {
         display: none;
     }
 
-    /* Mobile bottom navigation bar */
+    /* Show mobile bottom nav */
     .bottom-nav-mobile {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background-color: #000;
-        color: #fff;
-        padding: 10px 0;
-        display: flex;
-        justify-content: space-around; /* Distribute items evenly */
-        align-items: center;
-        z-index: 1000;
-        box-shadow: 0 -3px 8px rgba(0,0,0,0.2); /* Shadow for depth */
-        border-top: 1px solid #333; /* Top border */
-        border-radius: 0; /* No rounded corners for bottom nav */
+        display: flex !important;
     }
-
-    .bottom-nav-mobile a {
-        color: #fff;
-        text-decoration: none;
-        font-size: 0.9em;
-        display: flex;
-        flex-direction: column; /* Stack icon and text */
-        align-items: center;
-        gap: 3px; /* Small gap between icon and text */
-        padding: 5px;
-        flex-grow: 1; /* Make links take equal space */
-    }
-
-    .bottom-nav-mobile a i {
-        font-size: 1.5em; /* Larger icons for mobile */
-    }
-    
-    .bottom-nav-mobile a span { /* For message/notification counts */
-        font-size: 0.7em;
-        font-weight: bold;
-    }
-
-    .bottom-nav-mobile a:hover {
-        color: #e24040; /* Highlight on hover/tap */
-    }
-
-    /* Hide the .nav-right on mobile when it's part of the top nav */
-    .top-nav-desktop .nav-right {
-        display: none;
-    }
-
 
     .nav-left .site-link {
         font-size: 20px;
@@ -483,22 +460,18 @@ ul li::before {
     .nav-right a {
         font-size: 0.9em;
     }
-    
-    .nav-right {
-        gap: 10px; /* Reduce gap for smaller screens */
-    }
 
     .container, .profile-container {
-        width: 100%; /* Full width on smaller screens */
+        width: 100%;
         margin: 15px 0;
-        padding: 15px; /* Reduced padding */
-        border-radius: 0; /* No rounded corners for full-screen feel */
-        box-shadow: none; /* No shadow for app-like feel */
+        padding: 15px;
+        border-radius: 0;
+        box-shadow: none;
     }
-    
+
     .profile-banner {
         width: 100%;
-        margin: -15px -15px 15px -15px; /* Adjust negative margin for new padding */
+        margin: -15px -15px 15px -15px;
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
@@ -529,7 +502,7 @@ ul li::before {
          width: auto;
          padding: 8px 15px;
     }
-    
+
     form[action="/search"] {
         flex-direction: column;
         align-items: stretch;
@@ -554,8 +527,84 @@ ul li::before {
 }
 
 @media (max-width: 480px) {
-    /* Adjust specific elements for very small screens */
     .bottom-nav-mobile a {
-        font-size: 0.8em; /* Smaller text for very small screens */
+        font-size: 0.8em;
     }
+}
+
+body.hacker-theme {
+    background-color: #000 !important; /* Black background for the entire page */
+    color: #0F0 !important; /* Bright green text for the entire page */
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Lucida Console', monospace !important; /* Monospaced font for the entire page */
+    background-image:
+        linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px); /* Subtle grid pattern for the entire page */
+    background-size: 20px 20px;
+}
+body.hacker-theme h1,
+body.hacker-theme h2,
+body.hacker-theme h3 {
+    color: #00FF00; /* Bright green headings */
+    text-shadow: 0 0 8px rgba(0,255,0,0.8); /* Stronger subtle glow on headings */
+}
+body.hacker-theme p {
+    color: #0F0; /* Ensure paragraphs are green */
+}
+body.hacker-theme a {
+    color: #00F000; /* Green links */
+}
+body.hacker-theme a:hover {
+    color: #00CC00; /* Darker green on hover */
+}
+body.hacker-theme ul li {
+    color: #0F0;
+}
+body.hacker-theme ul li::before {
+    color: #00FF00;
+    font-weight: normal; /* Remove bold from bullet */
+}
+body.hacker-theme hr {
+    border-top: 1px dashed rgba(0,255,0,0.3); /* Dashed green line */
+    margin: 2em 0;
+}
+body.hacker-theme h2 { /* Adjust h2 border for hacker theme */
+    border-bottom-color: rgba(0,255,0,0.2);
+}
+
+body.hacker-theme .beta-warning {
+    background: #003300;
+    box-shadow: 0 0 10px rgba(0,255,0,0.5);
+    color: #0F0;
+}
+
+body.hacker-theme .top-nav-desktop,
+body.hacker-theme .bottom-nav-mobile {
+    background: linear-gradient(to right, #001100, #002200);
+    border-bottom-color: #00FF00;
+    border-top-color: #00FF00;
+    box-shadow: 0 0 10px rgba(0,255,0,0.3);
+}
+
+body.hacker-theme .top-nav-desktop a,
+body.hacker-theme .bottom-nav-mobile a {
+    color: #0F0;
+}
+
+body.hacker-theme .top-nav-desktop a:hover,
+body.hacker-theme .bottom-nav-mobile a:hover {
+    color: #00F000;
+}
+
+body.hacker-theme footer {
+    background-color: #001100;
+    color: #0F0;
+    box-shadow: 0 -3px 8px rgba(0,255,0,0.2);
+}
+
+/* Hacker Theme for AI Info Page - Container specific styles */
+.container.hacker-theme {
+    background-color: rgba(0, 10, 0, 0.85); /* Slightly transparent dark green for content blocks */
+    border: 1px solid #005500; /* Dark green border */
+    box-shadow: 0 0 15px rgba(0,255,0,0.5); /* Green glow effect */
+    padding: 30px 40px; /* Ensure container has good padding */
 }

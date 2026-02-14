@@ -5,26 +5,12 @@ from datetime import datetime, timedelta
 from flask_mail import Message
 from flask import url_for
 
-def send_confirmation_email_to_all_unconfirmed_users():
-    """
-    Sends a confirmation email to all users who have not yet confirmed their email address.
-    """
-    with app.app_context():
-        unconfirmed_accounts = Account.query.filter_by(confirmed=False).all()
-        for account in unconfirmed_accounts:
-            token = s.dumps(account.email, salt='email-confirm')
-            msg = Message('Confirme seu E-mail', sender=app.config['MAIL_DEFAULT_SENDER'], recipients=[account.email])
-            link = url_for('confirm_email', token=token, _external=True)
-            msg.body = 'Seu link de confirmação é {}'.format(link)
-            mail.send(msg)
-            print(f"Sent confirmation email to {account.email}")
 
-def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=False, target_username=None, target_email=None, delete=False, force=False):
+def find_and_delete_bots(days_old=None, no_bio=False, no_avatar=False, target_username=None, target_email=None, delete=False, force=False):
     """
     Finds and optionally deletes bot accounts based on a set of criteria.
 
     :param days_old: The maximum age of the accounts in days.
-    :param confirmed: Whether to filter by confirmed status.
     :param no_bio: Whether to filter by accounts with no bio.
     :param no_avatar: Whether to filter by accounts with no avatar.
     :param target_username: Specific username to filter by.
@@ -36,8 +22,6 @@ def find_and_delete_bots(days_old=None, confirmed=None, no_bio=False, no_avatar=
 
     if days_old is not None:
         query = query.filter(Account.created_at >= datetime.now() - timedelta(days=days_old))
-    if confirmed is not None:
-        query = query.filter(Account.confirmed == confirmed)
     if no_bio:
         query = query.filter(User.bio == None)
     if no_avatar:
@@ -78,13 +62,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Manage users and bots.')
     subparsers = parser.add_subparsers(dest='command')
 
-    # Sub-parser for sending confirmation emails
-    parser_confirm = subparsers.add_parser('send-confirmation', help='Send confirmation email to all unconfirmed users.')
-
     # Sub-parser for finding and deleting bots
     parser_bots = subparsers.add_parser('bots', help='Find and delete bots.')
     parser_bots.add_argument('--days', type=int, help='Maximum age of the accounts in days. If not specified, all ages are considered.')
-    parser_bots.add_argument('--unconfirmed-only', action='store_true', help='Only show unconfirmed accounts.')
     parser_bots.add_argument('--no-bio', action='store_true', help='Only show accounts with no bio.')
     parser_bots.add_argument('--no-avatar', action='store_true', help='Only show accounts with default avatar.')
     parser_bots.add_argument('--target-username', type=str, help='Specify a username to target.')
@@ -94,16 +74,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.command == 'send-confirmation':
-        send_confirmation_email_to_all_unconfirmed_users()
-    elif args.command == 'bots':
-        confirmed_status = None
-        if args.unconfirmed_only:
-            confirmed_status = False
-
+    if args.command == 'bots':
         find_and_delete_bots(
             days_old=args.days,
-            confirmed=confirmed_status,
             no_bio=args.no_bio,
             no_avatar=args.no_avatar,
             target_username=args.target_username,

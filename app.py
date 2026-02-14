@@ -33,6 +33,13 @@ app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')
 app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get('RECAPTCHA_PRIVATE_KEY', '')
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
 
+# Print reCAPTCHA config for debugging
+print(f"RECAPTCHA_PUBLIC_KEY: {app.config['RECAPTCHA_PUBLIC_KEY']}")
+print(f"RECAPTCHA_PRIVATE_KEY: {'*' * len(app.config['RECAPTCHA_PRIVATE_KEY']) if app.config['RECAPTCHA_PRIVATE_KEY'] else 'NOT SET'}")
+print(f"RECAPTCHA_USE_SSL: {app.config['RECAPTCHA_USE_SSL']}")
+
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # Disable caching for static files in development
+
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
@@ -64,12 +71,12 @@ from werkzeug.utils import secure_filename
 
 
 mail = Mail(app)
-s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+# s = URLSafeTimedSerializer(app.config['SECRET_KEY']) # REMOVE this line
 
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    # email = StringField('Email', validators=[DataRequired(), Email()]) # REMOVED
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     recaptcha = RecaptchaField()
@@ -98,11 +105,11 @@ class Account(Base):
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
+    email = Column(String(120), unique=False, nullable=True) # Modified to be nullable and non-unique
     password_hash = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    confirmed = Column(Boolean, nullable=False, default=False)
-    confirmed_on = Column(TIMESTAMP, nullable=True)
+    # confirmed = Column(Boolean, nullable=False, default=False) # REMOVED
+    # confirmed_on = Column(TIMESTAMP, nullable=True) # REMOVED
     user = relationship('User', uselist=False, back_populates='account', cascade="all, delete-orphan", single_parent=True, lazy=True)
 
 class User(Base):
@@ -416,19 +423,14 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         username = form.username.data
-        email = form.email.data
         password = form.password.data
         
         if Account.query.filter_by(username=username).first():
             flash("Usuário já existe", "error")
             return redirect(url_for("register"))
         
-        if Account.query.filter_by(email=email).first():
-            flash("E-mail já existe", "error")
-            return redirect(url_for("register"))
-
         password_hash = generate_password_hash(password)
-        new_account = Account(username=username, email=email, password_hash=password_hash, confirmed=True) # Temporarily set to True
+        new_account = Account(username=username, password_hash=password_hash)
         
         new_user = User(name=username)
         new_account.user = new_user
@@ -442,28 +444,6 @@ def register():
 
     return render_template("register.html", form=form)
 
-@app.route('/confirm_email/<token>')
-def confirm_email(token):
-    try:
-        email = s.loads(token, salt='email-confirm', max_age=3600)
-    except SignatureExpired:
-        return '<h1>O token expirou!</h1>'
-    except:
-        return '<h1>O token é inválido!</h1>'
-
-    account = Account.query.filter_by(email=email).first()
-    if not account:
-        flash("Conta não encontrada.", "error")
-        return redirect(url_for("login"))
-    account.confirmed = True
-    account.confirmed_on = func.now()
-
-    db_session.add(account)
-    db_session.commit()
-
-    flash('Sua conta foi confirmada com sucesso! Faça o login agora.', 'success')
-    return redirect(url_for('login'))
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -474,15 +454,10 @@ def login():
         account = Account.query.filter_by(username=username).first()
 
         if account and check_password_hash(account.password_hash, password):
-            if account.confirmed:
-                session["account_id"] = account.id
-                return redirect(url_for("dashboard"))
-            else:
-                flash("Sua conta ainda não foi confirmada. Por favor, verifique seu e-mail.", "error")
-                return redirect(url_for("login"))
-
-
-        return "Usuário ou senha inválidos"
+            session["account_id"] = account.id
+            return redirect(url_for("dashboard"))
+        
+        flash("Usuário ou senha inválidos", "error")
 
     return render_template("login.html")
 
@@ -527,6 +502,15 @@ def dashboard():
         compatible_users=compatible_users,
         is_uncustomized_profile=is_uncustomized_profile
     )
+
+@app.route("/ai-info")
+def ai_info():
+    return render_template("ai_info.html")
+
+@app.route("/how-it-works")
+def how_it_works():
+    return render_template("how_it_works.html")
+
 
 @app.route("/profile/<int:user_id>")
 def view_profile(user_id):

@@ -41,21 +41,6 @@
         </div>
         <p style="text-align: center;">{{ user.bio }}</p>
 
-        <div class="profile-actions" style="text-align: center; margin-bottom: 20px;">
-            <p><strong>{{ total_likes }}</strong> Likes recebidos</p>
-            {% if current_user_id and user.id != current_user_id %}
-                {% if has_liked %}
-                    <form method="POST" action="{{ url_for('unlike_user', user_id=user.id) }}" style="display: inline-block;">
-                        <button type="submit" class="btn-like btn-liked"><i class="fa-solid fa-heart"></i> Descurtir</button>
-                    </form>
-                {% else %}
-                    <form method="POST" action="{{ url_for('like_user', user_id=user.id) }}" style="display: inline-block;">
-                        <button type="submit" class="btn-like"><i class="fa-regular fa-heart"></i> Curtir</button>
-                    </form>
-                {% endif %}
-            {% endif %}
-        </div>
-
         <div class="card">
             <h2>Detalhes Pessoais</h2>
             {% if user.age %}

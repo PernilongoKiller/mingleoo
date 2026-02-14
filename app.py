@@ -414,18 +414,6 @@ class Follow(Base):
     follower = relationship('User', foreign_keys=[follower_id], backref=backref('following_associations', cascade="all, delete-orphan"))
     followed = relationship('User', foreign_keys=[followed_id], backref=backref('followed_by_associations', cascade="all, delete-orphan"))
 
-class Like(Base):
-    __tablename__ = 'likes'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False) # The user whose profile is liked
-    liker_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False) # The user who gave the like
-    timestamp = Column(TIMESTAMP, server_default=func.now())
-
-    __table_args__ = (UniqueConstraint('user_id', 'liker_id', name='_user_liker_uc'),)
-
-    liked_user = relationship('User', foreign_keys=[user_id], backref=backref('likes_received', lazy='dynamic', cascade="all, delete-orphan"))
-    liking_user = relationship('User', foreign_keys=[liker_id], backref=backref('likes_given', lazy='dynamic', cascade="all, delete-orphan"))
-
 class UserMessage(Base):
     __tablename__ = 'user_messages'
     id = Column(Integer, primary_key=True)
@@ -844,8 +832,6 @@ def view_profile(user_id):
     else:
         notification_count = 0
 
-    total_likes = viewed_user.likes_received.count()
-
     user_dict = {
         'id': viewed_user.id, 
         'name': viewed_user.name, 
@@ -872,9 +858,7 @@ def view_profile(user_id):
         links=links_list,
         is_following=is_following,
         current_user_id=logged_in_user.id if logged_in_user else None,
-        notification_count=notification_count,
-        total_likes=total_likes,
-        has_liked=has_liked
+        notification_count=notification_count
     )
 
 @app.route("/profile", methods=["GET", "POST"])

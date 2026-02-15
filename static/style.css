@@ -163,6 +163,7 @@ body {
     border-radius: 0;
 }
 
+
 /* ---------------------------
    Container principal
 --------------------------- */
@@ -181,6 +182,38 @@ body {
     display: block; /* Force stacking of content */
 }
 
+/* Specific styles for the discover page */
+body.discover-page .container {
+    display: block; /* Override default grid to allow content to stack */
+}
+
+body.discover-page .container h1,
+body.discover-page .container p,
+body.discover-page .container .search-bar {
+    margin-bottom: 25px; /* Ensure these elements have their own spacing */
+}
+
+.discover-content-wrapper {
+    /* Default for desktop */
+    display: flex;
+    gap: 25px; /* Space between user list and hashtags */
+    margin-top: 25px; /* Space from search bar/total users count */
+    width: 100%;
+}
+
+.discover-content-wrapper .discover-section {
+    flex: 1; /* Distribute space equally */
+    min-width: 0; /* Allow content to shrink */
+}
+
+/* Mobile styles for discover-content-wrapper */
+@media (max-width: 768px) {
+    .discover-content-wrapper {
+        flex-direction: column; /* Stack vertically on small screens */
+        gap: 0; /* No gap when stacked */
+    }
+}
+
 /* ---------------------------
    Cards e Seções
 --------------------------- */
@@ -196,6 +229,66 @@ body {
 
 .card:hover {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.user-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive columns */
+    gap: 25px; /* Space between cards */
+    margin-top: 30px;
+    margin-bottom: 30px;
+    justify-content: center; /* Center cards in the grid */
+}
+
+.user-card {
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--default-border-radius);
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transform: translateY(-5px); /* Subtle lift effect */
+}
+
+.user-card .user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* Circular avatar */
+    object-fit: cover; /* Ensures image covers the area without distortion */
+    margin-bottom: 15px;
+    border: 3px solid var(--primary-color);
+}
+
+.user-card h3 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+    font-size: 1.3em;
+}
+
+.user-card p {
+    font-size: 0.9em;
+    color: var(--light-text-color);
+    flex-grow: 1; /* Allow bio to take available space */
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit bio to 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-card .btn {
+    margin-top: auto; /* Push button to the bottom */
+    width: 100%;
 }
 
 .profile-container {

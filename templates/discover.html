@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Descobrir - Mingleoo{% endblock %}
+
+{% block body_class %}discover-page{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Descobrir Usuários</h1>
+        <p>Total de usuários no Mingleoo: {{ user_count }}</p>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" onkeyup="filterContent()" placeholder="Procurar por usuários...">
+        </div>
+
+        <div class="discover-content-wrapper">
+            <div class="discover-section">
+                <h2>Usuários</h2>
+                <ul id="userList">
+                    {% for user in users %}
+                        <li><a href="{{ url_for('view_profile', user_id=user.id) }}">{{ user.name }}</a></li>
+                    {% else %}
+                        <li>Nenhum usuário encontrado.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="discover-section">
+                <h2>Hashtags</h2>
+                <ul class="tag-list">
+                    {% for tag in tags %}
+                        <li><a href="{{ url_for('search', tag=tag.name) }}">#{{ tag.name }}</a></li>
+                    {% else %}
+                        <li>Nenhuma hashtag encontrada.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        function filterContent() {
+            let input = document.getElementById('searchInput');
+            let filter = input.value.toLowerCase();
+            let userList = document.getElementById('userList');
+            let users = userList.getElementsByTagName('li');
+            let hashtagList = document.querySelector('.tag-list');
+            let hashtags = hashtagList.getElementsByTagName('li');
+
+            for (let i = 0; i < users.length; i++) {
+                let userText = users[i].textContent || users[i].innerText;
+                if (userText.toLowerCase().indexOf(filter) > -1) {
+                    users[i].style.display = "";
+                } else {
+                    users[i].style.display = "none";
+                }
+            }
+
+            for (let i = 0; i < hashtags.length; i++) {
+                let hashtagText = hashtags[i].textContent || hashtags[i].innerText;
+                if (hashtagText.toLowerCase().indexOf(filter) > -1) {
+                    hashtags[i].style.display = "";
+                } else {
+                    hashtags[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+
+{% endblock %}

@@ -3,22 +3,24 @@
 {% block title %}Pesquisa - Mingleoo.com{% endblock %}
 
 {% block content %}
-<div class="beta-warning">
-    🚧 Estamos em beta. Bugs podem acontecer!
-</div>
-
+<div class="container">
     <h1>Perfis com #{{ tag }}</h1>
 
     {% if users %}
-        {% for user in users %}
-            <h3>{{ user.name }}</h3>
-            <p>{{ user.bio }}</p>
-            <a href="{{ url_for('view_profile', user_id=user.id) }}">Ver perfil</a>
-            <hr>
-        {% endfor %}
+        <div class="user-cards-grid">
+            {% for user in users %}
+                <div class="user-card">
+                    <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="user-avatar">
+                    <h3>{{ user.name }}</h3>
+                    <p>{{ user.bio }}</p>
+                    <a href="{{ url_for('view_profile', user_id=user.id) }}" class="btn">Ver perfil</a>
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
         <p>Nenhum perfil encontrado para #{{ tag }}</p>
     {% endif %}
 
-    <p><a href="/dashboard">Voltar ao dashboard</a></p>
+    <p><a href="/dashboard" class="back-link">Voltar ao dashboard</a></p>
+</div>
 {% endblock %}

@@ -35,9 +35,12 @@
         <button type="submit" class="btn">Pesquisar</button>
     </form>
 
-    <form action="{{ url_for('surprise') }}" method="GET" style="margin-top:20px;">
-        <button type="submit" class="btn">Surpreenda-me!</button>
-    </form>
+    <div style="display: flex; gap: 10px; margin-top:20px;">
+        <form action="{{ url_for('surprise') }}" method="GET">
+            <button type="submit" class="btn">Surpreenda-me!</button>
+        </form>
+        <a href="{{ url_for('discover') }}" class="btn">Descobrir</a>
+    </div>
 
     <hr>
 

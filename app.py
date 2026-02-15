@@ -596,53 +596,6 @@ def unfollow_user(user_id):
 
     return redirect(url_for("view_profile", user_id=user_id))
 
-@app.route("/like/<int:user_id>", methods=["POST"])
-def like_user(user_id):
-    liker = current_user()
-    if not liker:
-        return redirect(url_for("login"))
-
-    if liker.id == user_id:
-        flash("Você não pode curtir seu próprio perfil.", "error")
-        return redirect(url_for("view_profile", user_id=user_id))
-
-    liked_user = User.query.get(user_id)
-    if not liked_user:
-        flash("Usuário não encontrado.", "error")
-        return redirect(url_for("dashboard"))
-
-    existing_like = Like.query.filter_by(user_id=liked_user.id, liker_id=liker.id).first()
-    if existing_like:
-        flash(f"Você já curtiu o perfil de {liked_user.name}.", "info")
-        return redirect(url_for("view_profile", user_id=user_id))
-
-    new_like = Like(user_id=liked_user.id, liker_id=liker.id)
-    db_session.add(new_like)
-    db_session.commit()
-    flash(f"Você curtiu o perfil de {liked_user.name}!", "success")
-    return redirect(url_for("view_profile", user_id=user_id))
-
-@app.route("/unlike/<int:user_id>", methods=["POST"])
-def unlike_user(user_id):
-    liker = current_user()
-    if not liker:
-        return redirect(url_for("login"))
-
-    liked_user = User.query.get(user_id)
-    if not liked_user:
-        flash("Usuário não encontrado.", "error")
-        return redirect(url_for("dashboard"))
-
-    like = Like.query.filter_by(user_id=liked_user.id, liker_id=liker.id).first()
-    if like:
-        db_session.delete(like)
-        db_session.commit()
-        flash(f"Você descurtiu o perfil de {liked_user.name}.", "info")
-    else:
-        flash("Você não curtiu este perfil.", "error")
-
-    return redirect(url_for("view_profile", user_id=user_id))
-
 @app.route("/messages")
 def list_conversations():
     user = current_user()
@@ -815,6 +768,13 @@ def ai_info():
 def how_it_works():
     return render_template("how_it_works.html")
 
+@app.route("/discover")
+def discover():
+    all_users = User.query.all()
+    all_tags = Tag.query.all()
+    user_count = User.query.count()
+    return render_template("discover.html", users=all_users, tags=all_tags, user_count=user_count)
+
 
 @app.route("/profile/<int:user_id>")
 def view_profile(user_id):
@@ -824,10 +784,8 @@ def view_profile(user_id):
     
     logged_in_user = current_user()
     is_following = False
-    has_liked = False
     if logged_in_user:
         is_following = Follow.query.filter_by(follower_id=logged_in_user.id, followed_id=viewed_user.id).first() is not None
-        has_liked = Like.query.filter_by(user_id=viewed_user.id, liker_id=logged_in_user.id).first() is not None
         notification_count = Follow.query.filter_by(followed_id=logged_in_user.id).count()
     else:
         notification_count = 0
